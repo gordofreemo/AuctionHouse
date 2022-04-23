@@ -8,7 +8,7 @@ public class KnockKnock implements Runnable {
     private final Socket clientSocket;
     private PrintWriter out ;
     private BufferedReader in ;
-    private State state = State . WAITING ;
+    private State state = State.WAITING ;
     private int currentJoke = 0;
 
     private static String BYE = "Bye.";
