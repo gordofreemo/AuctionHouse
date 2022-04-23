@@ -1,0 +1,9 @@
+# Ignore InteliJ + VSCode configs
+.vscode/*
+.idea/*
+
+# Ignore class files
+*.class
+
+# Ignore ds_store
+.DS_Store
