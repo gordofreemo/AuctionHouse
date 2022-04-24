@@ -1,3 +1,5 @@
+package AuctionHouse;
+
 import util.ProxyObject;
 
 /*
