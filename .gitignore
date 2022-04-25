@@ -7,3 +7,6 @@
 
 # Ignore ds_store
 .DS_Store
+
+# Ignore IntelliJ "out" directory
+out/*
