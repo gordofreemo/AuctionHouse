@@ -1,3 +1,4 @@
+package Examples;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -30,7 +31,7 @@ public class KnockKnock implements Runnable {
         "Is there an owl in here?",
         "Is there an echo in here?"
     };
-    
+
     public KnockKnock(Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
         out = new PrintWriter(clientSocket.getOutputStream(), true);

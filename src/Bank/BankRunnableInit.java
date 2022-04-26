@@ -1,3 +1,4 @@
+package Bank;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -18,7 +19,7 @@ public class BankRunnableInit implements Runnable {
     @Override
     public void run() {
         String inputLine = null;
-        
+
         try {
             in.readLine();
         } catch (IOException ex) {
