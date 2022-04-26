@@ -1,5 +1,7 @@
 package util;
 
+import java.io.Serializable;
+
 /*
     Represents an object that the Agent, Bank, Auction House will communicate with
     instead of directly sending messages over the network.
