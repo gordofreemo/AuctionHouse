@@ -1,9 +1,10 @@
+package Examples;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class KnockKnockServer {
-  
+
     public static void main(String [] args) throws IOException {
         int portNumber = 22557;
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
