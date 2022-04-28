@@ -1,5 +1,10 @@
 # cs351-auctionhouse
 
+## Andrew Geyko 
+Agent to Auction House Communication: 
+<br> Upon establishing a connection with the AuctionHouse, 
+send a Message object with the "Agent" origin and a message type of 
+"Establish Connection"
 
 
 ## Getting started

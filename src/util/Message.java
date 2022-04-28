@@ -4,6 +4,7 @@ import util.MessageEnums.*;
 
 public class Message implements Serializable {
     public Origin origin = null;
+    public MessageEnums message;
     private String type = null;
     private String body = null;
     private Object proxy = null;

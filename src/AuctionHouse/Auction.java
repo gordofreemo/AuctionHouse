@@ -23,7 +23,7 @@ public class Auction {
         return auctionID;
     }
 
-    public void makeBid(AgentHandler agent, int amount) {
+    public synchronized void makeBid(AgentHandler agent, int amount) {
         if(amount < minBid) {
             agent.rejectBid();
         }

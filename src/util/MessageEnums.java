@@ -8,6 +8,12 @@ public class MessageEnums {
         AGENT
     }
 
+    // Messages that are needed for more than one type of communication channel
+    public enum General {
+        ESTABLISH_CONNECTION,
+        CLOSE_CONNECTION
+    }
+
     // Holds all the types (methods) that the Bank can send to the AuctionHouse
     public enum BankToAuctionHouse {
 
