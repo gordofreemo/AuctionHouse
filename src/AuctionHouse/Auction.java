@@ -10,26 +10,30 @@ public class Auction {
     private Item item;
     private long minBid;
     private long currBid;
+    private static int idCount = 0;
     private int auctionID;
+    private AgentProxy bidder;
 
-    public Auction(Item item, int auctionID, int minBid) {
-        this.item = item;
-        this.auctionID = auctionID;
-        this.minBid = minBid;
+    public Auction(String description) {
+        this.item = new Item(description, 1, auctionID);
+        this.auctionID = idCount++;
+        this.minBid = 0;
         this.currBid = 0;
+    }
+
+    public Item getItem() {
+        return item;
     }
 
     public int getAuctionID() {
         return auctionID;
     }
 
-    public synchronized void makeBid(AgentHandler agent, int amount) {
-        if(amount < minBid) {
-            agent.rejectBid();
-        }
-        else {
-            // probably ask bank for funds here
-        }
+    // at this point, bid should be verified
+    public synchronized void makeBid(AgentProxy agent, int amount) {
+        this.currBid = amount;
+        bidder = agent;
+        new Thread(makeCountdown()).start();
     }
 
     private Runnable makeCountdown() {
@@ -37,7 +41,7 @@ public class Auction {
             @Override
             public void run() {
                 try {
-                    Thread.sleep(30000);
+                    Thread.sleep(3000);
                 } catch (InterruptedException e) {
                     return;
                 }
@@ -47,7 +51,7 @@ public class Auction {
     }
 
     private void endAuction() {
-
+        bidder.alertWin(this);
     };
 
     @Override

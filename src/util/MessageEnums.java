@@ -1,6 +1,8 @@
 package util;
 
-public class MessageEnums {
+import java.io.Serializable;
+
+public class MessageEnums implements Serializable {
     // Holds all the possible origins
     public enum Origin {
         BANK,

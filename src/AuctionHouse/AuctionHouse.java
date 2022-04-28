@@ -1,46 +1,47 @@
 package AuctionHouse;
 
-import util.Message;
-import util.MessageEnums;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.List;
 
 public class AuctionHouse {
     private ArrayList<Auction> auctionList;
-    private ServerSocket serverSocket;
     private ArrayList<AgentProxy> connectedAgents;
+    private ItemNameGen nameGen;
 
     public AuctionHouse() throws IOException {
         auctionList = new ArrayList<Auction>();
-        serverSocket = new ServerSocket(0);
         connectedAgents = new ArrayList<>();
+        nameGen = new ItemNameGen("nouns.txt", "adjectives.txt");
+        auctionList.add(new Auction(nameGen.getItemName()));
+        auctionList.add(new Auction(nameGen.getItemName()));
+        auctionList.add(new Auction(nameGen.getItemName()));
     }
 
-    private void connectAgent(Socket socket, ObjectInputStream in, ObjectOutputStream out) {
-        AgentHandler handler = new AgentHandler(out);
-        AgentListener listener = new AgentListener(in);
-        connectedAgents.add(new AgentProxy(handler, listener));
+
+    public List<Auction> getAuctions() {
+        return auctionList;
     }
+
+
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         AuctionHouse auctionHouse = new AuctionHouse();
         int port = 4001;
-        try (ServerSocket socket = new ServerSocket(port)) {
+        try (ServerSocket server = new ServerSocket(port)) {
             while(true) {
-                Socket clientSocket = socket.accept();
-                ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
-                ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
-                Message message = (Message) in.readObject();
-                if(message.origin == MessageEnums.Origin.AGENT) {
-                    auctionHouse.connectAgent(clientSocket, in, out);
-                }
+                Socket socket = server.accept();
+                ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+                ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                AgentProxy newProxy = new AgentProxy(out, auctionHouse);
+                auctionHouse.connectedAgents.add(newProxy);
+                new Thread(new AgentListener(in, newProxy)).start();
             }
-        }
+        } catch (Exception e) { e.printStackTrace(); }
     }
 
 }

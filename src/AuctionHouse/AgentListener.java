@@ -1,5 +1,7 @@
 package AuctionHouse;
 
+import util.Message;
+
 import java.io.ObjectInputStream;
 
 /**
@@ -8,13 +10,24 @@ import java.io.ObjectInputStream;
 
 public class AgentListener implements Runnable {
     private ObjectInputStream in;
+    private AgentProxy proxy;
 
-    public AgentListener(ObjectInputStream in) {
+    public AgentListener(ObjectInputStream in, AgentProxy proxy) {
         this.in = in;
+        this.proxy = proxy;
     }
 
     @Override
     public void run() {
-
+        try {
+            while (true) {
+                Message message = (Message)in.readObject();
+                switch(message.getBody().toLowerCase()) {
+                    case "get" -> proxy.sendItems();
+                    case "bid" -> proxy.makeBid(100, 0);
+                }
+            }
+        }
+        catch (Exception e) {}
     }
 }
