@@ -36,6 +36,7 @@ public class Auction {
         new Thread(makeCountdown()).start();
     }
 
+    // make the countdown thread to inform bid winner
     private Runnable makeCountdown() {
         return new Runnable() {
             @Override

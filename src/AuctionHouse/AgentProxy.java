@@ -6,6 +6,11 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.List;
 
+/**
+ * Encapsulates agent interaction w/ the auction house and communication
+ * over the network.
+ */
+
 public class AgentProxy {
     private ObjectOutputStream out;
     private final MessageEnums.Origin ORIGIN = MessageEnums.Origin.AUCTIONHOUSE;
@@ -16,6 +21,7 @@ public class AgentProxy {
         this.out = out;
     }
 
+    // process the agent making a bid
     public void makeBid(int amount, int auctionID) {
         List<Auction> auctions = auctionHouse.getAuctions();
         Auction auction = null;
@@ -24,12 +30,14 @@ public class AgentProxy {
         auction.makeBid(this, amount);
     }
 
+    // alert agent he has won bid
     public void alertWin(Auction auction) {
         Item item = auction.getItem();
         Message message = new Message(ORIGIN, "", "YOU WON " + item);
         sendMessage(message);
     }
 
+    // send agent the list of items being auctioned
     public void sendItems() {
         List<Item> itemList = auctionHouse.getAuctions()
                 .stream().map(Auction::getItem).toList();
@@ -38,6 +46,7 @@ public class AgentProxy {
         sendMessage(message);
     }
 
+    // send the message across the network
     private void sendMessage(Message message) {
         try {
             out.writeObject(message);

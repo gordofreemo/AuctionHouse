@@ -17,6 +17,10 @@ public class AgentListener implements Runnable {
         this.proxy = proxy;
     }
 
+    /**
+     * Listen for messages from agent socket and communicate with proxy as
+     * necessary
+     */
     @Override
     public void run() {
         try {
