@@ -1,12 +1,16 @@
 package AuctionHouse.Testing;
 
-import AuctionHouse.AuctionProxy;
+import util.Message;
 
 import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
 
 public class SenderClient {
     public static void main(String[] args) throws IOException, ClassNotFoundException {
-        AuctionProxy proxy = new AuctionProxy("localhost", 4001);
-        proxy.makeConnection();
+        Socket socket = new Socket("localhost", 4001);
+        ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+        Message message = new Message(null, null, "YO MR WHITE");
+        out.writeObject(message);
     }
 }

@@ -36,6 +36,7 @@ public class MessageEnums {
 
     // Holds all the types (methods) that the Agent can send to the AuctionHouse
     public enum AgentToAuctionHouse {
-        MAKEBID
+        MAKEBID,
+        GET_ITEMS
     }
 }

@@ -12,6 +12,8 @@ public class Item implements Serializable {
     public long houseID;
     public long itemID;
     public String description;
+    public int currBid;
+    public int minBid;
 
     public Item(String description, long houseID, long itemID) {
         this.description = description;
@@ -23,6 +25,7 @@ public class Item implements Serializable {
     public String toString() {
         return description + ". HouseID: " + houseID + ". ItemID: " + itemID;
     }
+
     @Override
     public boolean equals(Object obj) {
         if(obj.getClass() != Item.class) return false;

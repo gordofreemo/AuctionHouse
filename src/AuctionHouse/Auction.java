@@ -23,7 +23,32 @@ public class Auction {
         return auctionID;
     }
 
-    public void makeBid() {}
+    public void makeBid(AgentHandler agent, int amount) {
+        if(amount < minBid) {
+            agent.rejectBid();
+        }
+        else {
+            // probably ask bank for funds here
+        }
+    }
+
+    private Runnable makeCountdown() {
+        return new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Thread.sleep(30000);
+                } catch (InterruptedException e) {
+                    return;
+                }
+                endAuction();
+            }
+        };
+    }
+
+    private void endAuction() {
+
+    };
 
     @Override
     public boolean equals(Object object) {
