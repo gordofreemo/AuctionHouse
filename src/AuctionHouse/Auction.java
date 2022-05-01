@@ -8,17 +8,20 @@ package AuctionHouse;
 
 public class Auction {
     private Item item;
-    private long minBid;
     private long currBid;
+    private final double bidScale = 1.25; // for now : must bid at least (1.25 * currBid) to count
     private static int idCount = 0;
     private int auctionID;
     private AgentProxy bidder;
+    private Runnable counterRun;
+    private Thread countdown;
 
     public Auction(String description) {
         this.item = new Item(description, 1, auctionID);
         this.auctionID = idCount++;
-        this.minBid = 0;
         this.currBid = 0;
+        counterRun = makeCountdown();
+        countdown = new Thread(counterRun);
     }
 
     public Item getItem() {
@@ -31,29 +34,39 @@ public class Auction {
 
     // at this point, bid should be verified
     public synchronized void makeBid(AgentProxy agent, int amount) {
+        countdown.interrupt();
         this.currBid = amount;
         bidder = agent;
-        new Thread(makeCountdown()).start();
+        countdown = new Thread(counterRun);
+        countdown.start();
+    }
+
+    public boolean validBid(int amount) {
+        if(amount < currBid * bidScale) return false;
+        return true;
     }
 
     // make the countdown thread to inform bid winner
     private Runnable makeCountdown() {
-        return new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread.sleep(3000);
-                } catch (InterruptedException e) {
-                    return;
-                }
-                endAuction();
+        return () -> {
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                return;
             }
+            endAuction();
         };
     }
 
     private void endAuction() {
+        System.out.println("YO HE WON");
         bidder.alertWin(this);
     };
+
+    @Override
+    public String toString() {
+        return "ID: " + auctionID + " selling " + item.toString();
+    }
 
     @Override
     public boolean equals(Object object) {

@@ -1,5 +1,7 @@
 package AuctionHouse;
 
+import util.Message;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -14,7 +16,7 @@ public class AuctionHouse {
     private ItemNameGen nameGen;
 
     public AuctionHouse() throws IOException {
-        auctionList = new ArrayList<Auction>();
+        auctionList = new ArrayList<>();
         connectedAgents = new ArrayList<>();
         nameGen = new ItemNameGen("nouns.txt", "adjectives.txt");
         auctionList.add(new Auction(nameGen.getItemName()));
@@ -27,9 +29,18 @@ public class AuctionHouse {
         return auctionList;
     }
 
+    public void endAuction(int auctionID) {
+        Auction end = null;
+        for(Auction auction : auctionList) {
+            if(auction.getAuctionID() == auctionID) end = auction;
+        }
+        if(end == null) return;
+        auctionList.remove(end);
+        auctionList.add(new Auction(nameGen.getItemName()));
+    }
 
 
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
+    public static void main(String[] args) throws IOException {
         AuctionHouse auctionHouse = new AuctionHouse();
         int port = 4001;
         try (ServerSocket server = new ServerSocket(port)) {
@@ -37,6 +48,7 @@ public class AuctionHouse {
                 Socket socket = server.accept();
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                out.writeObject(new Message(null, "success", "win"));
                 AgentProxy newProxy = new AgentProxy(out, auctionHouse);
                 auctionHouse.connectedAgents.add(newProxy);
                 new Thread(new AgentListener(in, newProxy)).start();

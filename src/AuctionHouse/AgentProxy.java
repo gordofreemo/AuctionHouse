@@ -23,16 +23,25 @@ public class AgentProxy {
 
     // process the agent making a bid
     public void makeBid(int amount, int auctionID) {
+        Message message = new Message(ORIGIN, "", "");
+        message.body = "bid_failed";
         List<Auction> auctions = auctionHouse.getAuctions();
         Auction auction = null;
         for(Auction  x : auctions) if(x.getAuctionID() == auctionID) auction = x;
-        if(auction == null) return;
+        if(auction == null || !auction.validBid(amount)) {
+            sendMessage(message);
+            return;
+        }
+
         auction.makeBid(this, amount);
+        message.body = "bid_success";
+        sendMessage(message);
     }
 
     // alert agent he has won bid
     public void alertWin(Auction auction) {
         Item item = auction.getItem();
+        auctionHouse.endAuction(auction.getAuctionID());
         Message message = new Message(ORIGIN, "", "YOU WON " + item);
         sendMessage(message);
     }
@@ -41,8 +50,16 @@ public class AgentProxy {
     public void sendItems() {
         List<Item> itemList = auctionHouse.getAuctions()
                 .stream().map(Auction::getItem).toList();
-        Message message = new Message(ORIGIN, "", "");
+        String auctions = "\n";
+        for(Auction auction : auctionHouse.getAuctions()) auctions += auction.toString() + '\n';
+        Message message = new Message(ORIGIN, "", auctions);
         message.setProxy(itemList);
+        sendMessage(message);
+    }
+
+    // method is called when a message needs to be sent to a particular agent
+    // from an outside source
+    public void messageRequest(Message message) {
         sendMessage(message);
     }
 
