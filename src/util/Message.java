@@ -14,26 +14,6 @@ public class Message implements Serializable {
         this.body = body;
     }
 
-    public Origin getOrigin() {
-        return origin;
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    public Object getProxy() {
-        return proxy;
-    }
-
-    public void setProxy(Object proxy) {
-        this.proxy = proxy;
-    }
-
     @Override
     public String toString() {
         return "Message from " + origin + " with type " + type + " and body " + body;
