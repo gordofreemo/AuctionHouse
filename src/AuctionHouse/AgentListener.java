@@ -1,6 +1,7 @@
 package AuctionHouse;
 
 import util.Message;
+import util.MessageEnums.*;
 
 import java.io.ObjectInputStream;
 import java.util.Scanner;
@@ -34,9 +35,10 @@ public class AgentListener implements Runnable {
         try {
             while (true) {
                 Message message = (Message)in.readObject();
-                switch(message.getType().toLowerCase()) {
-                    case "get" -> proxy.sendItems();
-                    case "bid" -> parseBid(message);
+                switch((Type) message.getType()) {
+                    case ESTABLISH_CONNECTION:
+                        break;
+                    default: break;
                 }
             }
         }

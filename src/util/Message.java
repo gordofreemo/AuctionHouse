@@ -4,12 +4,11 @@ import util.MessageEnums.*;
 
 public class Message implements Serializable {
     public Origin origin = null;
-    public MessageEnums message;
-    public String type = null;
+    public Type type = null;
     public String body = null;
     public Object proxy = null;
 
-    public Message(Origin origin, String type, String body) {
+    public Message(Origin origin, Type type, String body) {
         this.origin = origin;
         this.type = type;
         this.body = body;
@@ -19,7 +18,7 @@ public class Message implements Serializable {
         return origin;
     }
 
-    public String getType() {
+    public Type getType() {
         return type;
     }
 

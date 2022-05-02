@@ -10,41 +10,21 @@ public class MessageEnums implements Serializable {
         AGENT
     }
 
-    // Messages that are needed for more than one type of communication channel
-    public enum General {
+    // Holds all the possible types
+    public enum Type {
+        // General
         ESTABLISH_CONNECTION,
-        CLOSE_CONNECTION
-    }
-
-    // Holds all the types (methods) that the Bank can send to the AuctionHouse
-    public enum BankToAuctionHouse {
-
-    }
-
-    // Holds all the types (methods) that the Bank can send to the Agent
-    public enum BankToAgent {
-
-    }
-
-    // Holds all the types (methods) that the AuctionHouse can send to the Bank
-    public enum AuctionHouseToBank {
-        BLOCKFUNDS
-    }
-
-    // Holds all the types (methods) that the AuctionHouse can send to the Agent
-    public enum AuctionHouseToAgent {
+        CLOSE_CONNECTION,
+        //
+        BLOCKFUNDS,
+        //
         BIDSUCCESS,
-        BIDFAILED
-    }
-
-    // Holds all the types (methods) that the Agent can send to the Bank
-    public enum AgentToBank {
-        INIT
-    }
-
-    // Holds all the types (methods) that the Agent can send to the AuctionHouse
-    public enum AgentToAuctionHouse {
+        BIDFAILED,
+        //
+        INIT,
+        //
         MAKEBID,
+        //
         GET_ITEMS
     }
 }
