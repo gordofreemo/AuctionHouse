@@ -6,7 +6,7 @@ public class Message implements Serializable {
     public Origin origin = null;
     public Type type = null;
     public String body = null;
-    public Object proxy = null;
+    public Object info = null;
 
     public Message(Origin origin, Type type, String body) {
         this.origin = origin;

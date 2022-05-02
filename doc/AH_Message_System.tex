@@ -1,0 +1,136 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{amsfonts} 
+\usepackage{geometry}
+\usepackage{amssymb} 
+\usepackage{graphicx}
+\usepackage{rotating}
+\usepackage{verbatim}
+
+\graphicspath{ {images/} }
+
+\title{CS351 Auction House Project - Auction House Message System Outline}
+\author{Andrew Geyko}
+\date{}
+\linespread{2}
+\setlength{\parindent}{0cm}
+
+%Use by \begin{changemargin}{hmargin}{vmargin} content \end{changemargin}
+\def\changemargin#1#2{\list{}{\rightmargin#2\leftmargin#1}\item[]}
+\let\endchangemargin=\endlist 
+
+\newgeometry{vmargin={1mm}, hmargin={15mm,17mm}}
+
+\begin{document}
+\normalsize
+\maketitle 
+This document serves to outline the how the Auction House utilizes the messaging system in order to provide a (hopefully) acessible format for creating components that interact with it. I believe that it would be easier for the bank to specify it's own standard of how it receives messages since it seems that the AuctionHouse/Agent are requesting things for the bank to do, and specifying something like that here would just put unneccessary constraints on the bank code. 
+\vspace{0.5cm}
+\\\emph{This document is a work in progress, please let me know if some change in this format would make it easier to write your code, we can work on changing it}
+
+\vspace{3cm} 
+
+\huge 
+Initial Connection 
+\normalsize
+\\An initial connection is established when a socket is first opened. When the AuctionHouse receives the following message, it will send a response aknowledging that the connection was successful. If the response is not received, something has probably broke.
+\footnotesize 
+\\\emph{Message (Agent$\to$AH) Format} 
+\begin{enumerate}
+	\item[]\emph{Origin:} Origin.AGENT
+	\item[]\emph{Type: } Type.ESTABLISH\_CONNECTION 
+	\item[]\emph{Body: } Will probably need to specify the bank account number here, not sure yet
+	\item[]\emph{Info: } N/A 
+\end{enumerate}
+\emph{Message (AH$\to$Agent) Format} 
+\begin{enumerate}
+	\item[]\emph{Origin:} Origin.AUCTIONHOUSE 
+	\item[]\emph{Type: } Some kind of Acknowledgement enum (not implemented yet) 
+	\item[]\emph{Body: } N/A 
+	\item[]\emph{Info: } N/A 
+\end{enumerate}
+\clearpage
+\huge
+Main Logic 
+
+\vspace{1cm}
+
+\large 
+Getting Items 
+\normalsize
+\\The get items message will be used by the agent to get a list of the items being auctioned along with their ID numbers (which will be used to specify which item to bid on). 
+\footnotesize
+\\\emph{Message (Agents$\to$AH) Format} 
+\begin{enumerate}
+	\item[]\emph{Origin:} Origin.AGENT 
+	\item[]\emph{Type: } Type.GET\_ITEMS
+	\item[]\emph{Body: } N/A
+	\item[]\emph{Info: } N/A 
+\end{enumerate} 
+\emph{Message (AH$\to$Agent) Format} 
+\begin{enumerate}
+	\item[]\emph{Origin:} Origin.AUCTIONHOUSE
+	\item[]\emph{Type:} Probably some kind of send\_items enum, not implemented yet
+	\item[]\emph{Body:} N/A
+	\item[]\emph{Info:} I don't have a complete idea for this yet, but here are the three main ones I've thought of: 
+		\begin{enumerate}
+			\item Just send the Auction object (probably a bad idea for encapsulation reasons) 
+			\item Send a string with the data needed (probably a bad idea because it would be annoying to parse) 
+			\item Create a new ``AuctionInfo'' class to hold the information agent would need, and send that (probably the best idea) 
+		\end{enumerate}
+\end{enumerate} 
+
+\vspace{1cm} 
+
+\large
+Bidding 
+\normalsize
+\\ The bid message will be used to make a bid (clearly). It will be necessary to specify the amount that the agent is bidding, and the ID of the auction the agent wants to bid on. In response, the agent will receive a message stating whether the bid was accepted or denied. 
+\footnotesize
+\\\emph{Message (Agents$\to$AH) Format} 
+\begin{enumerate} 
+	\item[]\emph{Origin:} Origin.AGENT
+	\item[]\emph{Type: } Type.MAKEBID 
+	\item[]\emph{Body: } This will be two separate lines (separated by newline character). The first line will specify an integer amount for the amount to bet. The second line will be an integer id of the auction to bet on (this id is sent in the ``get items'' message)
+	\item[]\emph{Info:} N/A 
+\end{enumerate}
+\emph{Message (AH$\to$Agent) Format} 
+\begin{enumerate}
+	\item[]\emph{Origin:} Origin.AUCTIONHOUSE
+	\item[]\emph{Type:} BIDSUCCESS | BIDFAILED (self-explanatory) 
+	\item[]\emph{Body:} Maybe a string outlining the reason for the failure, but maybe not necessary. 
+	\item[]\emph{Info:} N/A 
+\end{enumerate} 
+
+
+\clearpage
+
+
+\large
+Winning a Bid 
+\normalsize
+\\ In this case, the agent does not send a message, but just gets one whenever it wins. No response is necessary (yet), so the agent just needs to process this on its own. 
+\footnotesize
+\\\emph{Message (AH$\to$Agent) Format} 
+\begin{enumerate} 
+	\item[]\emph{Origin:} Origin.AUCTIONHOUSE
+	\item[]\emph{Type:} probably an enum like ``bid\_won'', not implemented yet 
+	\item[]\emph{Body:} N/A 
+	\item[]\emph{Info:} Will probably be an ``AuctionInfo'' object as described in the getting items message, still need to work out a format for that. 
+\end{enumerate}
+
+\vspace{1cm} 
+
+\large
+Outbid by other agent 
+\normalsize
+\\ I haven't though about or implemented too much of this feature, but will update in future. 
+
+\vspace{1cm}
+
+\large
+Closing Connection 
+\normalsize
+\\ I haven't though about this one too much either, will update in future. 
+
+\end{document}
