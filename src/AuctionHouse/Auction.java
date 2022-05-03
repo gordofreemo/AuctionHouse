@@ -25,19 +25,34 @@ public class Auction {
         countdown = new Thread(counterRun);
     }
 
+    /**
+     * @return - item being sold in this auction
+     */
     public Item getItem() {
         return item;
     }
 
+    /**
+     * @return - id of the current auction
+     */
     public int getAuctionID() {
         return auctionID;
     }
 
+    /**
+     * @return - gets the agent that had bid previously, used for outbid
+     * notification. Might remove this and alert the bidder in this class.
+     */
     public AgentProxy getPrevBidder() {
         return prevBidder;
     }
 
-    // at this point, bid should be verified
+    /**
+     * When calling this method, the bid should be verified through the use
+     * of talking with the bank and by calling the validBid
+     * @param agent
+     * @param amount
+     */
     public synchronized void makeBid(AgentProxy agent, int amount) {
         countdown.interrupt();
         this.currBid = amount;

@@ -23,7 +23,14 @@ public class AgentProxy {
         this.out = out;
     }
 
-    // process the agent making a bid
+    /**
+     * Handles the logic for an agent making a bid on an auction.
+     * Sends either a bid failed or a bid success message to the agent
+     * depending on what happened. If bid is successful, alerts the previous
+     * bidder that he has been outbid.
+     * @param amount - amount that the agent is bidding
+     * @param auctionID - ID of the auction the agent is bidding on
+     */
     public void makeBid(int amount, int auctionID) {
         Message message = new Message(ORIGIN, Type.BID_FAILED, "");
         message.setBody("bid failed");
@@ -42,7 +49,11 @@ public class AgentProxy {
         sendMessage(message);
     }
 
-    // alert agent he has won bid
+    /**
+     * Sends a message to the agent who has just won a given auction.
+     * Also ends the auction
+     * @param auction - auction object representing auction that was just won
+     */
     public void alertWin(Auction auction) {
         Item item = auction.getItem();
         auctionHouse.endAuction(auction.getAuctionID());
@@ -50,7 +61,10 @@ public class AgentProxy {
         sendMessage(message);
     }
 
-    // send agent the list of items being auctioned
+    /**
+     * When receiving a get_items request, send a list of the items
+     * to the agent as a message
+     */
     public void sendItems() {
         List<Item> itemList = auctionHouse.getAuctions()
                 .stream().map(Auction::getItem).toList();
@@ -61,13 +75,20 @@ public class AgentProxy {
         sendMessage(message);
     }
 
-    // method is called when a message needs to be sent to a particular agent
-    // from an outside source
+    /**
+     * Method that is used by outside classes to send a given message to the
+     * agent. Might remove this in favor of message system encapsulation
+     * @param message - message to send
+     */
     public void messageRequest(Message message) {
         sendMessage(message);
     }
 
-    // send the message across the network
+    /**
+     * Sends a message across the network. It is its own separate method
+     * so it can catch that pesky IO exception.
+     * @param message - message to send over the network to given agent
+     */
     private void sendMessage(Message message) {
         try {
             out.writeObject(message);

@@ -18,6 +18,11 @@ public class AgentListener implements Runnable {
         this.proxy = proxy;
     }
 
+    /**
+     * When receiving the bid message, parse the message for the amount
+     * and the auction on which the agent wants to bid on
+     * @param message - bid message to parse
+     */
     private void parseBid(Message message) {
         Scanner sc = new Scanner(message.getBody());
         Integer amount = Integer.parseInt(sc.nextLine());

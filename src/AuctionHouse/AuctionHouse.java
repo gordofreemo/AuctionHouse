@@ -27,16 +27,29 @@ public class AuctionHouse {
     }
 
 
+    /**
+     * @return - list of all the current auctions
+     */
     public List<Auction> getAuctions() {
         return auctionList;
     }
 
+    /**
+     * Alert the previous bidder on the auction that he has been outbid
+     * @param auctionID - auction in which an agent has just been outbid on
+     */
     public void alertOutbid(int auctionID) {
         Message message = new Message(Origin.AUCTIONHOUSE, Type.BID_OUTBID, "\nOutbid in auction w/ id" + auctionID);
         AgentProxy prev = getAuction(auctionID).getPrevBidder();
+        if(prev == null) return;
         prev.messageRequest(message);
     }
 
+    /**
+     * After an auction is over, remove it from the list of current auctions
+     * and create a new one
+     * @param auctionID - auction to remove
+     */
     public void endAuction(int auctionID) {
         Auction end = getAuction(auctionID);
         auctionList.remove(end);
@@ -44,6 +57,10 @@ public class AuctionHouse {
     }
 
 
+    /**
+     * @param auctionID - auctionID to look for
+     * @return - auction object w/ given auctionID
+     */
     private Auction getAuction(int auctionID) {
         Auction get = null;
         for(Auction auction : auctionList) {
