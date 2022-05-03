@@ -32,12 +32,9 @@ public class AuctionHouse {
     }
 
     public void alertOutbid(int auctionID) {
-        AgentProxy bidder = getAuction(auctionID).getBidder();
-        Message outbid = new Message(Origin.AUCTIONHOUSE, Type.BID_OUTBID, ""); // probably include auction id in body
-        for(AgentProxy agent : connectedAgents) {
-            if(bidder == agent) continue;
-            agent.messageRequest(outbid);
-        }
+        Message message = new Message(Origin.AUCTIONHOUSE, Type.BID_OUTBID, "\nOutbid in auction w/ id" + auctionID);
+        AgentProxy prev = getAuction(auctionID).getPrevBidder();
+        prev.messageRequest(message);
     }
 
     public void endAuction(int auctionID) {

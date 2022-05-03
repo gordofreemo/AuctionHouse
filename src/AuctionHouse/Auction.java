@@ -13,6 +13,7 @@ public class Auction {
     private static int idCount = 0;
     private int auctionID;
     private AgentProxy bidder;
+    private AgentProxy prevBidder;
     private Runnable counterRun;
     private Thread countdown;
 
@@ -32,14 +33,15 @@ public class Auction {
         return auctionID;
     }
 
-    public AgentProxy getBidder() {
-        return bidder;
+    public AgentProxy getPrevBidder() {
+        return prevBidder;
     }
 
     // at this point, bid should be verified
     public synchronized void makeBid(AgentProxy agent, int amount) {
         countdown.interrupt();
         this.currBid = amount;
+        prevBidder = bidder;
         bidder = agent;
         countdown = new Thread(counterRun);
         countdown.start();
@@ -54,7 +56,7 @@ public class Auction {
     private Runnable makeCountdown() {
         return () -> {
             try {
-                Thread.sleep(3000);
+                Thread.sleep(10000);
             } catch (InterruptedException e) {
                 return;
             }
