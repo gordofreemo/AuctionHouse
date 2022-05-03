@@ -35,10 +35,9 @@ public class AgentListener implements Runnable {
         try {
             while (true) {
                 Message message = (Message)in.readObject();
-                switch((Type) message.getType()) {
-                    case ESTABLISH_CONNECTION:
-                        break;
-                    default: break;
+                switch(message.type) {
+                    case MAKE_BID -> parseBid(message);
+                    case GET_ITEMS -> proxy.sendItems();
                 }
             }
         }

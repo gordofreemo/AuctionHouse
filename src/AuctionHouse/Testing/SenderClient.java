@@ -1,7 +1,8 @@
 package AuctionHouse.Testing;
 
 import util.Message;
-import util.MessageEnums;
+import util.MessageEnums.Origin;
+import util.MessageEnums.Type;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -16,16 +17,21 @@ public class SenderClient {
         ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
         Scanner sc = new Scanner(System.in);
         while(true) {
+            Message message = new Message(Origin.AGENT, null, "");
             System.out.println("Please enter the message type: ");
             String type = sc.nextLine();
             System.out.println("Please enter the message body: ");
             String body = sc.nextLine();
             if(type.equals("bid")) {
+                message.type = Type.MAKE_BID;
                 System.out.println("Please enter message body line 2 : ");
                 body += '\n' + sc.nextLine();
             }
+            else if (type.equals("get")) {
+                message.type = Type.GET_ITEMS;
+            }
             if(!type.equals("read")) {
-                Message message = new Message(MessageEnums.Origin.AGENT, type, body);
+                message.body = body;
                 out.writeObject(message);
             }
             Message returnMessage = (Message) in.readObject();

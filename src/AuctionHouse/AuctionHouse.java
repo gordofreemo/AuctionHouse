@@ -49,8 +49,7 @@ public class AuctionHouse {
                 Socket socket = server.accept();
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                // Send registration message
-                out.writeObject(new Message(null, Type.INIT, "win"));
+                out.writeObject(new Message(null, Type.ACKNOWLEDGE_CONNECTION,"hello agent"));
                 AgentProxy newProxy = new AgentProxy(out, auctionHouse);
                 auctionHouse.connectedAgents.add(newProxy);
                 new Thread(new AgentListener(in, newProxy)).start();

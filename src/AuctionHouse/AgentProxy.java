@@ -1,7 +1,9 @@
 package AuctionHouse;
 
 import util.Message;
-import util.MessageEnums;
+import util.MessageEnums.Origin;
+import util.MessageEnums.Type;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.util.List;
@@ -13,7 +15,7 @@ import java.util.List;
 
 public class AgentProxy {
     private ObjectOutputStream out;
-    private final MessageEnums.Origin ORIGIN = MessageEnums.Origin.AUCTIONHOUSE;
+    private final Origin ORIGIN = Origin.AUCTIONHOUSE;
     private AuctionHouse auctionHouse;
 
     public AgentProxy(ObjectOutputStream out, AuctionHouse auctionHouse) throws IOException {
@@ -23,8 +25,8 @@ public class AgentProxy {
 
     // process the agent making a bid
     public void makeBid(int amount, int auctionID) {
-        Message message = new Message(ORIGIN, "", "");
-        message.body = "bid_failed";
+        Message message = new Message(ORIGIN, Type.BID_FAILED, "");
+        message.body = "bid failed";
         List<Auction> auctions = auctionHouse.getAuctions();
         Auction auction = null;
         for(Auction  x : auctions) if(x.getAuctionID() == auctionID) auction = x;
@@ -34,7 +36,8 @@ public class AgentProxy {
         }
 
         auction.makeBid(this, amount);
-        message.body = "bid_success";
+        message.body = "bid success";
+        message.type = Type.BID_SUCCESS;
         sendMessage(message);
     }
 
@@ -42,7 +45,7 @@ public class AgentProxy {
     public void alertWin(Auction auction) {
         Item item = auction.getItem();
         auctionHouse.endAuction(auction.getAuctionID());
-        Message message = new Message(ORIGIN, "", "YOU WON " + item);
+        Message message = new Message(ORIGIN, Type.BID_WIN, "YOU WON " + item);
         sendMessage(message);
     }
 
@@ -52,8 +55,8 @@ public class AgentProxy {
                 .stream().map(Auction::getItem).toList();
         String auctions = "\n";
         for(Auction auction : auctionHouse.getAuctions()) auctions += auction.toString() + '\n';
-        Message message = new Message(ORIGIN, "", auctions);
-        message.setProxy(itemList);
+        Message message = new Message(ORIGIN, Type.SEND_ITEMS, auctions);
+        message.info = itemList;
         sendMessage(message);
     }
 
