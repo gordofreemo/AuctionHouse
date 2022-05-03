@@ -2,6 +2,7 @@ package AuctionHouse;
 
 import util.Message;
 import util.MessageEnums.Type;
+import util.MessageEnums.Origin;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -30,16 +31,29 @@ public class AuctionHouse {
         return auctionList;
     }
 
-    public void endAuction(int auctionID) {
-        Auction end = null;
-        for(Auction auction : auctionList) {
-            if(auction.getAuctionID() == auctionID) end = auction;
+    public void alertOutbid(int auctionID) {
+        AgentProxy bidder = getAuction(auctionID).getBidder();
+        Message outbid = new Message(Origin.AUCTIONHOUSE, Type.BID_OUTBID, ""); // probably include auction id in body
+        for(AgentProxy agent : connectedAgents) {
+            if(bidder == agent) continue;
+            agent.messageRequest(outbid);
         }
-        if(end == null) return;
+    }
+
+    public void endAuction(int auctionID) {
+        Auction end = getAuction(auctionID);
         auctionList.remove(end);
         auctionList.add(new Auction(nameGen.getItemName()));
     }
 
+
+    private Auction getAuction(int auctionID) {
+        Auction get = null;
+        for(Auction auction : auctionList) {
+            if(auction.getAuctionID() == auctionID) get = auction;
+        }
+        return get;
+    }
 
     public static void main(String[] args) throws IOException {
         AuctionHouse auctionHouse = new AuctionHouse();
@@ -49,6 +63,7 @@ public class AuctionHouse {
                 Socket socket = server.accept();
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+                in.readObject();
                 out.writeObject(new Message(null, Type.ACKNOWLEDGE_CONNECTION,"hello agent"));
                 AgentProxy newProxy = new AgentProxy(out, auctionHouse);
                 auctionHouse.connectedAgents.add(newProxy);

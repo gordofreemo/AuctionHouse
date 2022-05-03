@@ -1,7 +1,6 @@
 package AuctionHouse;
 
 import util.Message;
-import util.MessageEnums.*;
 
 import java.io.ObjectInputStream;
 import java.util.Scanner;

@@ -32,6 +32,10 @@ public class Auction {
         return auctionID;
     }
 
+    public AgentProxy getBidder() {
+        return bidder;
+    }
+
     // at this point, bid should be verified
     public synchronized void makeBid(AgentProxy agent, int amount) {
         countdown.interrupt();
@@ -59,7 +63,6 @@ public class Auction {
     }
 
     private void endAuction() {
-        System.out.println("YO HE WON");
         bidder.alertWin(this);
     };
 

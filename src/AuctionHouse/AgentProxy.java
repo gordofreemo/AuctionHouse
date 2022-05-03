@@ -38,6 +38,7 @@ public class AgentProxy {
         auction.makeBid(this, amount);
         message.setBody("bid success");
         message.setType(Type.BID_SUCCESS);
+        auctionHouse.alertOutbid(auctionID);
         sendMessage(message);
     }
 

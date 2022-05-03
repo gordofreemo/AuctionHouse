@@ -11,7 +11,7 @@ public class MessageEnums implements Serializable {
     }
 
     // Holds all the possible types
-    public enum Type {
+    public enum Type implements Serializable {
         /*
           General
         */
@@ -20,7 +20,7 @@ public class MessageEnums implements Serializable {
         ACKNOWLEDGE_CONNECTION,
 
         /*
-         Bank -> Agent
+         AuctionHouse -> Bank
         */
         BLOCKFUNDS,
 

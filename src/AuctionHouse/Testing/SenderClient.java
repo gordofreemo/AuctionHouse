@@ -23,15 +23,16 @@ public class SenderClient {
             System.out.println("Please enter the message body: ");
             String body = sc.nextLine();
             if(type.equals("bid")) {
-                message.type = Type.MAKE_BID;
+                message.setType(Type.MAKE_BID);
                 System.out.println("Please enter message body line 2 : ");
                 body += '\n' + sc.nextLine();
             }
-            else if (type.equals("get")) {
-                message.type = Type.GET_ITEMS;
+            else if(type.equals("get")) {
+                message.setType(Type.GET_ITEMS);
             }
+
             if(!type.equals("read")) {
-                message.body = body;
+                message.setBody(body);
                 out.writeObject(message);
             }
             Message returnMessage = (Message) in.readObject();
