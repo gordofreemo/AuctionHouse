@@ -12,19 +12,31 @@ public class MessageEnums implements Serializable {
 
     // Holds all the possible types
     public enum Type {
-        // General
+        /*
+          General
+        */
         ESTABLISH_CONNECTION,
         CLOSE_CONNECTION,
-        //
+        ACKNOWLEDGE_CONNECTION,
+
+        /*
+         Bank -> Agent
+        */
         BLOCKFUNDS,
-        //
-        BIDSUCCESS,
-        BIDFAILED,
-        //
-        INIT,
-        //
-        MAKEBID,
-        //
+
+        /*
+          AuctionHouse -> Agent
+        */
+        BID_SUCCESS,
+        BID_FAILED,
+        BID_WIN,
+        BID_OUTBID,
+        SEND_ITEMS,
+
+        /*
+         Agent -> AuctionHouse
+         */
+        MAKE_BID,
         GET_ITEMS
     }
 }

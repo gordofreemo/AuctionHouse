@@ -1,6 +1,7 @@
 package AuctionHouse;
 
 import util.Message;
+import util.MessageEnums.Type;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -48,7 +49,7 @@ public class AuctionHouse {
                 Socket socket = server.accept();
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                out.writeObject(new Message(null, "success", "win"));
+                out.writeObject(new Message(null, Type.ACKNOWLEDGE_CONNECTION,"hello agent"));
                 AgentProxy newProxy = new AgentProxy(out, auctionHouse);
                 auctionHouse.connectedAgents.add(newProxy);
                 new Thread(new AgentListener(in, newProxy)).start();
