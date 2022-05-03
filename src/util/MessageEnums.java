@@ -21,8 +21,6 @@ public class MessageEnums implements Serializable {
         BIDSUCCESS,
         BIDFAILED,
         //
-        INIT,
-        //
         MAKEBID,
         //
         GET_ITEMS

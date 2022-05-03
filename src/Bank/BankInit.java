@@ -12,12 +12,12 @@ import java.io.ObjectInputStream;
 import util.*;
 import util.MessageEnums.*;
 
-public class BankRunnableInit implements Runnable {
+public class BankInit implements Runnable {
     private final Socket clientSocket;
     // private PrintWriter out;
     private ObjectInputStream in;
 
-    public BankRunnableInit(Socket clientSocket) throws IOException {
+    public BankInit(Socket clientSocket) throws IOException {
         this.clientSocket = clientSocket;
         // out = new PrintWriter(clientSocket.getOutputStream(), true);
         // in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
@@ -29,17 +29,14 @@ public class BankRunnableInit implements Runnable {
         Message msg = null;
         try {
             msg = (Message) in.readObject();
-        } catch (IOException ex) {
+        } catch (IOException | ClassNotFoundException ex) {
             msg = null;
-        } catch (ClassNotFoundException e) { // @TODO FIGURE OUT WHY WE NEED THIS
-            // TODO Auto-generated catch block
-            e.printStackTrace();
         }
 
         if (msg.getOrigin() == Origin.AGENT) {
-            BankRunnableAgent kk = null;
+            BankToAgent kk = null;
             try {
-                kk = new BankRunnableAgent(clientSocket);
+                kk = new BankToAgent(clientSocket);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -48,9 +45,9 @@ public class BankRunnableInit implements Runnable {
             t.start();
         }
         else if (msg.getOrigin() == Origin.AUCTIONHOUSE) {
-            BankRunnableAuctionHouse kk = null;
+            BankToAuctionHouse kk = null;
             try {
-                kk = new BankRunnableAuctionHouse(clientSocket);
+                kk = new BankToAuctionHouse(clientSocket);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();

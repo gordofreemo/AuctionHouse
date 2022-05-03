@@ -12,7 +12,7 @@ public class Bank {
                 // Create new thread to handle each client
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("New socket connection from " + clientSocket.getRemoteSocketAddress());
-                BankRunnableInit kk = new BankRunnableInit(clientSocket);
+                BankInit kk = new BankInit(clientSocket);
                 Thread t = new Thread(kk);
                 t.start();
             }
