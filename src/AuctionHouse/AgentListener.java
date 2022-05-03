@@ -20,7 +20,7 @@ public class AgentListener implements Runnable {
     }
 
     private void parseBid(Message message) {
-        Scanner sc = new Scanner(message.body);
+        Scanner sc = new Scanner(message.getBody());
         Integer amount = Integer.parseInt(sc.nextLine());
         Integer auctionID = Integer.parseInt(sc.nextLine());
         proxy.makeBid(amount, auctionID);
@@ -35,7 +35,7 @@ public class AgentListener implements Runnable {
         try {
             while (true) {
                 Message message = (Message)in.readObject();
-                switch(message.type) {
+                switch(message.getType()) {
                     case MAKE_BID -> parseBid(message);
                     case GET_ITEMS -> proxy.sendItems();
                 }

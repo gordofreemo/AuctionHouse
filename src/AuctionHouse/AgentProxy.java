@@ -26,7 +26,7 @@ public class AgentProxy {
     // process the agent making a bid
     public void makeBid(int amount, int auctionID) {
         Message message = new Message(ORIGIN, Type.BID_FAILED, "");
-        message.body = "bid failed";
+        message.setBody("bid failed");
         List<Auction> auctions = auctionHouse.getAuctions();
         Auction auction = null;
         for(Auction  x : auctions) if(x.getAuctionID() == auctionID) auction = x;
@@ -36,8 +36,8 @@ public class AgentProxy {
         }
 
         auction.makeBid(this, amount);
-        message.body = "bid success";
-        message.type = Type.BID_SUCCESS;
+        message.setBody("bid success");
+        message.setType(Type.BID_SUCCESS);
         sendMessage(message);
     }
 
@@ -56,7 +56,7 @@ public class AgentProxy {
         String auctions = "\n";
         for(Auction auction : auctionHouse.getAuctions()) auctions += auction.toString() + '\n';
         Message message = new Message(ORIGIN, Type.SEND_ITEMS, auctions);
-        message.info = itemList;
+        message.setInfo(itemList);
         sendMessage(message);
     }
 

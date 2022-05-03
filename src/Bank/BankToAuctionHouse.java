@@ -10,6 +10,8 @@ public class BankToAuctionHouse implements Runnable {
     private final Socket clientSocket;
     private ObjectInputStream in;
     private ObjectOutputStream out;
+    private String name;
+    private String desc;
 
     public BankToAuctionHouse(Socket clientSocket) throws IOException {
         // Register thread with bank state tracker
@@ -31,7 +33,6 @@ public class BankToAuctionHouse implements Runnable {
     }
 
     public String getAddress() {
-        return clientSocket.getInetAddress().getHostAddress() + clientSocket.getPort();
+        return clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort();
     }
-
 }

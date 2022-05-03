@@ -1,12 +1,15 @@
 package util;
 import java.io.Serializable;
+import java.util.List;
+
+import AuctionHouse.Item;
 import util.MessageEnums.*;
 
 public class Message implements Serializable {
-    public Origin origin = null;
-    public Type type = null;
-    public String body = null;
-    public Object info = null;
+    private Origin origin = null;
+    private Type type = null;
+    private String body = null;
+    private Object info = null;
 
     public Message(Origin origin, Type type, String body) {
         this.origin = origin;
@@ -17,5 +20,29 @@ public class Message implements Serializable {
     @Override
     public String toString() {
         return "Message from " + origin + " with type " + type + " and body " + body;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    public String getBody() {
+        return body;
+    }
+
+    public Origin getOrigin() {
+        return origin;
+    }
+
+    public void setBody(String body) {
+        this.body = body;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
+    }
+
+    public void setInfo(Object info) {
+        this.info = info;
     }
 }
