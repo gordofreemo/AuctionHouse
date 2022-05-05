@@ -21,6 +21,7 @@ public class AgentProxy {
     public AgentProxy(ObjectOutputStream out, AuctionHouse auctionHouse) {
         this.auctionHouse = auctionHouse;
         this.out = out;
+        sendMessage(new Message(Origin.AUCTIONHOUSE, Type.ACKNOWLEDGE_CONNECTION,"hello agent"));
     }
 
     /**
