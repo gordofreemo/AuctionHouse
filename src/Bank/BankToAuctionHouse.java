@@ -5,11 +5,13 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 import util.Message;
+import util.MessageEnums.*;
 
 public class BankToAuctionHouse implements Runnable {
     private final Socket clientSocket;
     private ObjectInputStream in;
     private ObjectOutputStream out;
+    private int id;
     private String name;
     private String desc;
 
@@ -30,6 +32,29 @@ public class BankToAuctionHouse implements Runnable {
         } catch (IOException | ClassNotFoundException ex) {
             msg = null;
         }
+
+        switch ((Type) msg.getType()) {
+            case ESTABLISH_CONNECTION: //send id back
+
+                break;
+            case MAKE_BID:
+                String[] body = msg.getBody().split("\n");
+                int amount = Integer.parseInt(body[0]);
+                int id = Integer.parseInt(body[1]);
+                BankState.getInstance().blockFunds(amount, id);
+                break;
+            case BID_OUTBID:
+                break;
+            case CLOSE_CONNECTION:
+                break;
+            default: break;
+        }
+    }
+
+    private void initHouse(String body) {
+        String[] msg = body.split("\n");
+        name = msg[0];
+        id = BankState.getInstance().getNewId();
     }
 
     public String getAddress() {

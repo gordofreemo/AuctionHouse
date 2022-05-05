@@ -18,6 +18,7 @@ public class MessageEnums implements Serializable {
         ESTABLISH_CONNECTION,
         CLOSE_CONNECTION,
         ACKNOWLEDGE_CONNECTION,
+        ACCOUNT_NOT_FOUND,
 
         /*
          AuctionHouse -> Bank
@@ -37,6 +38,9 @@ public class MessageEnums implements Serializable {
          Agent -> AuctionHouse
          */
         MAKE_BID,
-        GET_ITEMS
+        GET_ITEMS,
+
+        // Agent -> Bank
+        CHECK_FUNDS,
     }
 }
