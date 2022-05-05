@@ -18,7 +18,7 @@ public class AgentProxy {
     private final Origin ORIGIN = Origin.AUCTIONHOUSE;
     private AuctionHouse auctionHouse;
 
-    public AgentProxy(ObjectOutputStream out, AuctionHouse auctionHouse) throws IOException {
+    public AgentProxy(ObjectOutputStream out, AuctionHouse auctionHouse) {
         this.auctionHouse = auctionHouse;
         this.out = out;
     }
