@@ -18,8 +18,9 @@ public class Auction {
     private Thread countdown;
 
     public Auction(String description) {
-        this.item = new Item(description, 1);
-        this.auctionID = idCount++;
+        this.auctionID = idCount;
+        this.item = new Item(description, idCount);
+        idCount++;
         this.currBid = 0;
         counterRun = makeCountdown();
         countdown = new Thread(counterRun);
@@ -56,6 +57,7 @@ public class Auction {
     public synchronized void makeBid(AgentProxy agent, int amount) {
         countdown.interrupt();
         this.currBid = amount;
+        item.currentBid = amount;
         prevBidder = bidder;
         bidder = agent;
         countdown = new Thread(counterRun);
