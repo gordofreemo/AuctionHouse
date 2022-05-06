@@ -4,3 +4,13 @@ Golden
 Rare
 Vintage
 Broken
+Smelly
+Tasty
+Okay
+Pretty Good
+Long
+Short
+Round
+Strange
+Unique
+Burnt
