@@ -18,7 +18,7 @@ public class Auction {
     private Thread countdown;
 
     public Auction(String description) {
-        this.item = new Item(description, 1, auctionID);
+        this.item = new Item(description, 1);
         this.auctionID = idCount++;
         this.currBid = 0;
         counterRun = makeCountdown();

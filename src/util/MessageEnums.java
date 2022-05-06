@@ -27,7 +27,8 @@ public class MessageEnums implements Serializable {
         /*
          AuctionHouse -> Bank
         */
-        BLOCKFUNDS,
+        BLOCK_FUNDS,
+        UNBLOCK_FUNDS,
 
         /*
           AuctionHouse -> Agent

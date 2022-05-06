@@ -17,11 +17,16 @@ public class AgentProxy {
     private ObjectOutputStream out;
     private final Origin ORIGIN = Origin.AUCTIONHOUSE;
     private AuctionHouse auctionHouse;
+    private int agentID;
 
     public AgentProxy(ObjectOutputStream out, AuctionHouse auctionHouse) {
         this.auctionHouse = auctionHouse;
         this.out = out;
         sendMessage(new Message(Origin.AUCTIONHOUSE, Type.ACKNOWLEDGE_CONNECTION,"hello agent"));
+    }
+
+    public int getAgentID() {
+        return agentID;
     }
 
     /**

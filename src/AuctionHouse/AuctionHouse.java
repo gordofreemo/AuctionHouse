@@ -71,8 +71,10 @@ public class AuctionHouse {
 
     public static void main(String[] args) throws IOException {
         AuctionHouse auctionHouse = new AuctionHouse();
-        int port = 4001;
-        try (ServerSocket server = new ServerSocket(port)) {
+        int serverPort = 4001;
+        int bankPort = 4002;
+
+        try (ServerSocket server = new ServerSocket(serverPort)) {
             while(true) {
                 Socket socket = server.accept();
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
