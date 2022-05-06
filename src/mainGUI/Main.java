@@ -3,6 +3,8 @@ package mainGUI;
 import Agent.Agent;
 import AuctionHouse.*;
 import javafx.application.Application;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -16,8 +18,11 @@ import javafx.stage.Stage;
 import javafx.scene.canvas.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Scanner;
 
 public class Main extends Application {
     public final int WIDTH = 1000;
@@ -26,12 +31,16 @@ public class Main extends Application {
     public BorderPane border = new BorderPane();
     public AuctionHouse currHouse;
     public String agentName = "Agent";
+    public HashMap<AuctionHouse, String> auctionHouseNameMap = new HashMap<>();
+    public List<String> allHouseNames = new ArrayList<>();
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-        agent = new Agent(100, "Test");
-        // forTesting();
+        agent = new Agent(100, "Bob");
+        agentName = agent.name;
+        forTesting();
 
+        pullHouseNames();
 
         border.setLeft(showActionHouses());
         border.setCenter(items());
@@ -45,14 +54,28 @@ public class Main extends Application {
     }
 
     /**
+     * Pull all the house names from the text file. Similar to the nouns/adjectives
+     */
+    public void pullHouseNames(){
+        InputStream s1 = ClassLoader.getSystemResourceAsStream("houseNames.txt");
+        Scanner sc = new Scanner(s1);
+        while(sc.hasNext()) allHouseNames.add(sc.nextLine());
+    }
+
+    /**
      * This function is implemented for testing purposes
      * It fills the agent with a fake auction house with fake items to make
      * sure the elements of the GUI are working correctly
      */
     public void forTesting() throws IOException {
         AuctionHouse testHouse = new AuctionHouse();
+        AuctionHouse houseTwo = new AuctionHouse();
 
+        agent.auctionHouses = new ArrayList<>();
         agent.auctionHouses.add(testHouse);
+        agent.auctionHouses.add(houseTwo);
+
+        currHouse = testHouse;
     }
 
     /**
@@ -62,7 +85,7 @@ public class Main extends Application {
     public VBox showActionHouses(){
         VBox vbox = new VBox();
         vbox.setPadding(new Insets(40,40,10,40));
-
+        vbox.setSpacing(30);
 
         Text auctionHouseTitleText = new Text("Auction Houses");
         auctionHouseTitleText.setStyle("-fx-font: 18 arial;");
@@ -89,12 +112,30 @@ public class Main extends Application {
      * @return the button
      */
     public Button auctionListButton(AuctionHouse house){
-        Button auctionButton = new Button();
-
-
+        String houseName = getHouseName(house);
+        Button auctionButton = new Button(houseName);
+        auctionButton.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                currHouse = house;
+                border.setCenter(items());
+            }
+        });
         return auctionButton;
     }
 
+    /**
+     * Assigns a name from the list to the auction house
+     * @param house the house that needs a name
+     * @return the name for the house
+     */
+    public String getHouseName(AuctionHouse house){
+        int r1 = (int)(Math.random() * allHouseNames.size());
+        if(auctionHouseNameMap.containsValue(allHouseNames.get(r1))) return getHouseName(house);
+        else auctionHouseNameMap.put(house, allHouseNames.get(r1));
+
+        return auctionHouseNameMap.get(house);
+    }
     /**
      * Creates the tab panes that holds all the values from the current auciton house
      * @return
@@ -107,12 +148,11 @@ public class Main extends Application {
 
         // For testing, since the list of auction houses is null
         // @todo remove once list of auction houses is functional
-        if(currHouse == null) {
+        if(agent.auctionHouses == null) {
             for (int i = 0; i < 3; i++) {
                 String name = "Item Name " + (i+1);
                 tabs.add(testTab(name));
             }
-
             itemPane.getTabs().addAll(tabs);
         }
 
@@ -173,13 +213,52 @@ public class Main extends Application {
      * @return the created tab
      */
     public Tab itemTab(Auction auction){
+        //@todo get these values from the auction class
+        int currBid = 0;
+        double bidScale = 1.25;
+
         String itemName = auction.getItem().description;
         Tab itemTab = new Tab(itemName);
         VBox mainVBox = new VBox();
-        mainVBox.setSpacing(10);
+        mainVBox.setSpacing(20);
 
+        // Set the title of the item for sale
+        VBox itemTitle = new VBox();
+        itemTitle.setPadding(new Insets(30,10,0,10));
+        Text itemDescription = new Text(itemName);
+        itemDescription.setStyle("-fx-font: 16 arial;");
+        itemTitle.getChildren().add(itemDescription);
 
+        // Add the item ID
+        VBox itemIDBox = new VBox();
+        Text itemID = new Text("Item number " + auction.getAuctionID());
+        itemIDBox.setPadding(new Insets(0,10,0,10));
+        itemID.setStyle("-fx-font: 14 arial;");
+        itemIDBox.getChildren().add(itemID);
 
+        // Add the current bid price,
+        VBox curBidVBox = new VBox();
+        curBidVBox.setPadding(new Insets(0,10,0,10));
+        Text curBidText = new Text("Leading bid: $" + 0); //@todo get the current bid from the auction
+        curBidText.setStyle("-fx-font: 14 arial;");
+        curBidVBox.getChildren().add(curBidText);
+
+        // Add the HBox which contains the bid textfield
+        HBox makeBidHBox = new HBox();
+        Text makeBidText = new Text("Make a bid of $" + (currBid*bidScale) + " or more     ");
+        TextField typeBid = new TextField();
+        Button submitBid = new Button("Submit Bid");
+        submitBid.setOnAction(new EventHandler<ActionEvent>() {
+            @Override
+            public void handle(ActionEvent event) {
+                //@todo call make bid function after checking if agent can bid given amount
+                System.out.println("Bid submitted");
+            }
+        });
+
+        makeBidHBox.getChildren().addAll(makeBidText, typeBid, submitBid);
+
+        mainVBox.getChildren().addAll(itemTitle, itemIDBox, curBidVBox, makeBidHBox);
         itemTab.setContent(mainVBox);
         return itemTab;
     }

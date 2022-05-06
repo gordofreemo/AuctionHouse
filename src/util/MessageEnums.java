@@ -17,13 +17,18 @@ public class MessageEnums implements Serializable {
         */
         ESTABLISH_CONNECTION,
         CLOSE_CONNECTION,
+        CHECK_CLOSE,
+        CAN_CLOSE,
+        CANT_CLOSE,
         ACKNOWLEDGE_CONNECTION,
+
         ACCOUNT_NOT_FOUND,
 
         /*
          AuctionHouse -> Bank
         */
-        BLOCKFUNDS,
+        BLOCK_FUNDS,
+        UNBLOCK_FUNDS,
 
         /*
           AuctionHouse -> Agent

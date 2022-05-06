@@ -71,14 +71,15 @@ public class AuctionHouse {
 
     public static void main(String[] args) throws IOException {
         AuctionHouse auctionHouse = new AuctionHouse();
-        int port = 4001;
-        try (ServerSocket server = new ServerSocket(port)) {
+        int serverPort = 4001;
+        int bankPort = 4002;
+
+        try (ServerSocket server = new ServerSocket(serverPort)) {
             while(true) {
                 Socket socket = server.accept();
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
                 in.readObject();
-                out.writeObject(new Message(null, Type.ACKNOWLEDGE_CONNECTION,"hello agent"));
                 AgentProxy newProxy = new AgentProxy(out, auctionHouse);
                 auctionHouse.connectedAgents.add(newProxy);
                 new Thread(new AgentListener(in, newProxy)).start();

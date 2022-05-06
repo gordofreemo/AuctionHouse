@@ -39,6 +39,7 @@ public class AgentListener implements Runnable {
         try {
             while (true) {
                 Message message = (Message)in.readObject();
+                System.out.println(message);
                 switch(message.getType()) {
                     case MAKE_BID -> parseBid(message);
                     case GET_ITEMS -> proxy.sendItems();
