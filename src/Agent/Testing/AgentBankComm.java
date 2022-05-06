@@ -38,7 +38,6 @@ public class AgentBankComm implements Runnable {
             out.writeObject(outMsg);
             out.flush();
 
-
             try {
                 Message response = (Message) in.readObject();
                 System.out.println(response);
@@ -50,7 +49,8 @@ public class AgentBankComm implements Runnable {
             e.printStackTrace();
         }
 
-        System.out.println("Made it passed the try statement");
+        while(true){}
+
     }
     @Override
     public void run() {

@@ -136,6 +136,7 @@ public class Main extends Application {
 
         return auctionHouseNameMap.get(house);
     }
+
     /**
      * Creates the tab panes that holds all the values from the current auciton house
      * @return
@@ -146,15 +147,6 @@ public class Main extends Application {
                 CornerRadii.EMPTY, BorderWidths.DEFAULT)));
         List<Tab> tabs = new ArrayList<>();
 
-        // For testing, since the list of auction houses is null
-        // @todo remove once list of auction houses is functional
-        if(agent.auctionHouses == null) {
-            for (int i = 0; i < 3; i++) {
-                String name = "Item Name " + (i+1);
-                tabs.add(testTab(name));
-            }
-            itemPane.getTabs().addAll(tabs);
-        }
 
        if(currHouse == null) return itemPane; // Don't try to build the tabs if there are no auction houses
         for(Auction auction : currHouse.getAuctions()){
@@ -163,48 +155,6 @@ public class Main extends Application {
         }
 
         return itemPane;
-    }
-
-    /**
-     * Used for testing tab creations
-     * @return the testTab
-     */
-    public Tab testTab(String name){
-        Tab testTab = new Tab(name);
-        VBox mainVBox = new VBox();
-        mainVBox.setSpacing(40);
-
-        VBox itemName = new VBox();
-        Text itemDescription = new Text("Item Name will go here");
-        itemName.getChildren().add(itemDescription);
-
-        VBox itemId = new VBox();
-        Text id = new Text("Item ID will go here");
-        itemId.getChildren().add(id);
-
-        VBox currBid = new VBox();
-        Text currentBid = new Text("Current Bid: $60");
-        currBid.getChildren().add(currentBid);
-
-        VBox makeBid = new VBox();
-        makeBid.setSpacing(5);
-        TextField bidAmount = new TextField("Bid Amount");
-        bidAmount.setMaxWidth(200);
-        Text minBid = new Text("Make bid of $60 or more");
-        Button placeBid = new Button("Place bid");
-        makeBid.getChildren().addAll(bidAmount, minBid, placeBid);
-
-
-        mainVBox.getChildren().addAll(
-                itemName,
-                itemId,
-                currBid,
-                makeBid
-        );
-
-        testTab.setContent(mainVBox);
-        testTab.setClosable(false); // Don't allow the tab to be closed
-        return testTab;
     }
 
     /**
@@ -243,7 +193,7 @@ public class Main extends Application {
         curBidText.setStyle("-fx-font: 14 arial;");
         curBidVBox.getChildren().add(curBidText);
 
-        // Add the HBox which contains the bid textfield
+        // Add the HBox which contains the bid text field
         HBox makeBidHBox = new HBox();
         Text makeBidText = new Text("Make a bid of $" + (currBid*bidScale) + " or more     ");
         TextField typeBid = new TextField();
@@ -252,7 +202,12 @@ public class Main extends Application {
             @Override
             public void handle(ActionEvent event) {
                 //@todo call make bid function after checking if agent can bid given amount
-                System.out.println("Bid submitted");
+                int bidAmount = Integer.parseInt(typeBid.getText());
+                if(bidAmount <= agent.avaliableBalance){
+                    System.out.println("Bid submitted at a value of: " + bidAmount);
+                    agent.proxy.makeBid(bidAmount);
+                }
+
             }
         });
 
