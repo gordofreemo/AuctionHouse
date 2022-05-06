@@ -1,8 +1,10 @@
 package Bank;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 
 import util.Message;
 import util.MessageEnums.*;
@@ -20,84 +22,88 @@ public class BankToAgent implements Runnable{
     private int id;
     private boolean running = true;
 
-    public BankToAgent(Socket clientSocket) throws IOException {
+    public BankToAgent(Socket clientSocket, ObjectOutputStream out, ObjectInputStream in, Message msg) throws IOException {
+        System.out.println("Agent connection detected");
+
         // Register thread with bank state tracker
         BankState.getInstance().addAgentThread(this);
 
         this.clientSocket = clientSocket;
-        in = new ObjectInputStream(clientSocket.getInputStream());
-        out = new ObjectOutputStream(clientSocket.getOutputStream());
+        this.out = out;
+        this.in = in;
 
-        System.out.println("Agent connection recieved from " + clientSocket.getInetAddress().getAddress());
+        // establish conection
+        System.out.println("Establishing connection");
+        establishConnection(msg.getBody());
     }
 
     @Override
     public void run() {
         while (running) {
-            Message msg = null;
             try {
-                msg = (Message) in.readObject();
-            } catch (IOException | ClassNotFoundException ex) {
-                msg = null;
+                Message msg = (Message) in.readObject();
+                switch ((Type) msg.getType()) {
+                    case CHECK_FUNDS -> {
+                        System.out.println("Checking funds");
+                        String[] body = msg.getBody().split("\n");
+
+                        try {
+                            int amount = Integer.parseInt(body[0]);
+                            int id = Integer.parseInt(body[1]);
+                            out.writeObject((Type) BankState.getInstance().blockFunds(amount, id));
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    case BID_WIN -> {
+
+                    }
+
+                    case CLOSE_CONNECTION -> {
+                        closeConnection();
+                    }
+
+                    default -> {}
+                }
             }
-
-            switch ((Type) msg.getType()) {
-                case ESTABLISH_CONNECTION:
-                    System.out.println("Establishing connection");
-                    initUser(msg.getBody());
-
-                    while (BankState.getInstance().getAuctionHouseThreads().size() == 0) {}
-
-                    List<String> auctionHouses = BankState.getInstance().getAuctionHouses();
-
-                    String addresses = "";
-                    for (var auctionHouse : auctionHouses) {
-                        addresses += auctionHouse + "\n";
-                    }
-
-                    Message outMsg = new Message(
-                        Origin.BANK,
-                        Type.ESTABLISH_CONNECTION,
-                        id + "\n" + addresses.trim()
-                    );
-
-                    try {
-                        out.writeObject(outMsg);
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
-                    }
-                    break;
-                case CHECK_FUNDS: // send response message to the auction house
-                    System.out.println("Checking funds");
-                    String[] body = msg.getBody().split("\n");
-
-                    try {
-                        int amount = Integer.parseInt(body[0]);
-                        int id = Integer.parseInt(body[1]);
-                        out.writeObject((Type) BankState.getInstance().blockFunds(amount, id));
-                    }
-                    catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    break;
-                case BID_WIN:
-
-                    break;
-                case CLOSE_CONNECTION:
-                    running = true;
-                    break;
-                default: break;
+            catch (EOFException | SocketException e) {
+                closeConnection();
+            }
+            catch (Exception e) {
+                e.printStackTrace();
             }
         }
     }
 
-    private void initUser(String body) {
+    private void establishConnection(String body) {
         String[] msg = body.split("\n");
         name = msg[0].split(":")[1];
         balance = Integer.parseInt(msg[1].split(":")[1]);
         id = BankState.getInstance().getNewId();
         System.out.println("name: " + name + "\nbalance: " + balance + "\nid: " + id);
+
+        while (BankState.getInstance().getAuctionHouseThreads().size() == 0) {} // @TODO busy wait
+
+        List<String> auctionHouses = BankState.getInstance().getAuctionHouses();
+
+        String addresses = "";
+        for (var auctionHouse : auctionHouses) {
+            addresses += auctionHouse + "\n";
+        }
+
+        Message outMsg = new Message(
+            Origin.BANK,
+            Type.ESTABLISH_CONNECTION,
+            id + "\n" + addresses.trim()
+        );
+
+        try {
+            out.writeObject(outMsg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public int getId() {
@@ -113,8 +119,14 @@ public class BankToAgent implements Runnable{
         return Type.BID_SUCCESS;
     }
 
-    public void releaseFunds() {
-        balance += blocked;
-        blocked = 0;
+    public void releaseFunds(int amount, int id) {
+        blocked -= amount;
+        balance += amount;
+    }
+
+    private void closeConnection() {
+        System.out.println("Socket closed, ending thread");
+        BankState.getInstance().removeAgentThread(id);
+        running = false;
     }
 }

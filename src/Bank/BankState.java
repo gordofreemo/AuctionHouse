@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
+import AuctionHouse.Auction;
+import AuctionHouse.AuctionHouse;
 import util.MessageEnums.*;
 
 public class BankState {
@@ -39,6 +41,24 @@ public class BankState {
         AuctionHouseThreads.add(auctionHouseThread);
     }
 
+    public void removeAgentThread(int id) {
+        for (var thread : AgentThreads) {
+            if (thread.getId() == id) {
+                AgentThreads.remove(thread);
+                return;
+            }
+        }
+    }
+
+    public void removeAuctionHouseThread(int id) {
+        for (var thread : AuctionHouseThreads) {
+            if (thread.getId() == id) {
+                AuctionHouseThreads.remove(thread);
+                return;
+            }
+        }
+    }
+
     public synchronized int getNewId() {
         return id++;
     }
@@ -53,6 +73,7 @@ public class BankState {
 
     public Type blockFunds(int amount, int id) {
         for (var AgentThread : AgentThreads) {
+            System.out.println("agent id: " + AgentThread.getId() + "\nsupplied id: " + id);
             if (AgentThread.getId() == id) {
                 return AgentThread.blockFunds(amount);
             }
@@ -60,10 +81,10 @@ public class BankState {
         return Type.ACCOUNT_NOT_FOUND;
     }
 
-    public void releaseFunds() {
+    public void releaseFunds(int amount, int id) {
         for (var AgentThread : AgentThreads) {
             if (AgentThread.getId() == id) {
-                AgentThread.releaseFunds();
+                AgentThread.releaseFunds(amount, id);
             }
         }
     }
