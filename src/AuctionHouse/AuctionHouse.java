@@ -16,6 +16,7 @@ public class AuctionHouse {
     private ArrayList<Auction> auctionList;
     private ArrayList<AgentProxy> connectedAgents;
     private ItemNameGen nameGen;
+    private BankProxy bank;
 
     public AuctionHouse() throws IOException {
         auctionList = new ArrayList<>();
@@ -32,6 +33,10 @@ public class AuctionHouse {
      */
     public List<Auction> getAuctions() {
         return auctionList;
+    }
+
+    public boolean blockFunds(int agentID, int amount) {
+        return bank.blockFunds(agentID, amount);
     }
 
     /**
@@ -72,15 +77,19 @@ public class AuctionHouse {
     public static void main(String[] args) throws IOException {
         AuctionHouse auctionHouse = new AuctionHouse();
         int serverPort = 4001;
-        int bankPort = 4002;
+        String bankHostname = "10.88.174.104";
+        int bankPort = 51362;
+
+        auctionHouse.bank = new BankProxy(bankHostname, bankPort);
 
         try (ServerSocket server = new ServerSocket(serverPort)) {
             while(true) {
                 Socket socket = server.accept();
                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                in.readObject();
-                AgentProxy newProxy = new AgentProxy(out, auctionHouse);
+                Message message = (Message)in.readObject();
+                int agentID = Integer.parseInt(message.getBody());
+                AgentProxy newProxy = new AgentProxy(out, auctionHouse, agentID);
                 auctionHouse.connectedAgents.add(newProxy);
                 new Thread(new AgentListener(in, newProxy)).start();
             }

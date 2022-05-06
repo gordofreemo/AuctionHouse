@@ -14,7 +14,7 @@ public class AgentBankComm implements Runnable {
     private ObjectOutputStream out;
 
     public static void main(String[] args) throws IOException{
-        String hostName = "10.88.171.199";
+        String hostName = "10.88.174.104";
         int portNumber = 51362;
         String info = "Name:Bob" + '\n' + "Balance:100";
         //Message outMsg = new Message(AGENT, ESTABLISH_CONNECTION, info);

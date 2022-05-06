@@ -19,9 +19,10 @@ public class AgentProxy {
     private AuctionHouse auctionHouse;
     private int agentID;
 
-    public AgentProxy(ObjectOutputStream out, AuctionHouse auctionHouse) {
+    public AgentProxy(ObjectOutputStream out, AuctionHouse auctionHouse, int agentID) {
         this.auctionHouse = auctionHouse;
         this.out = out;
+        this.agentID = agentID;
         sendMessage(new Message(Origin.AUCTIONHOUSE, Type.ACKNOWLEDGE_CONNECTION,"hello agent"));
     }
 
@@ -47,10 +48,13 @@ public class AgentProxy {
             sendMessage(message);
             return;
         }
-
+        boolean bankCheck = auctionHouse.blockFunds(agentID, amount);
         auction.makeBid(this, amount);
-        message.setBody("bid success");
-        message.setType(Type.BID_SUCCESS);
+
+        if(bankCheck) {
+            message.setBody("bid success");
+            message.setType(Type.BID_SUCCESS);
+        }
         auctionHouse.alertOutbid(auctionID);
         sendMessage(message);
     }

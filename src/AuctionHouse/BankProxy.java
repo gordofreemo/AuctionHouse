@@ -8,6 +8,7 @@ import util.Tuple;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.Socket;
 import java.util.HashMap;
 
 public class BankProxy {
@@ -17,16 +18,18 @@ public class BankProxy {
     private BankListener listener;
     private HashMap<Integer, Tuple<Thread, AsyncHelper>> awaits;
 
-    public BankProxy(ObjectInputStream in, ObjectOutputStream out) {
-        this.out = out;
-        listener = new BankListener(in);
+    public BankProxy(String hostname, int port) throws IOException {
+        Socket socket = new Socket(hostname, port);
+        out = new ObjectOutputStream(socket.getOutputStream());
+        out.writeObject(new Message(origin, Type.ESTABLISH_CONNECTION, "The Shop"));
+        listener = new BankListener(new ObjectInputStream(socket.getInputStream()));
         awaits = new HashMap<>();
         new Thread(listener).start();
     }
 
     public boolean blockFunds(int agentID, int amount) {
         Message message = new Message(origin, Type.MAKE_BID, "");
-        message.setBody("" + agentID + '\n' + amount);
+        message.setBody("" + amount + '\n' + agentID);
         // Sets up logic for awaiting response from bank
         AsyncHelper await = new AsyncHelper();
         Thread thread = new Thread(await);
@@ -39,6 +42,10 @@ public class BankProxy {
         awaits.remove(agentID);
 
         return await.state;
+    }
+
+    public void unblockFunds(int agentID, int amount) {
+
     }
 
     private void sendMessage(Message message) {
@@ -62,6 +69,7 @@ public class BankProxy {
             while(true) {
                 try {
                     Message msg = (Message)in.readObject();
+                    System.out.println(msg);
                     switch (msg.getType()) {
                         case BID_FAILED -> {
                             int id = Integer.parseInt(msg.getBody());
@@ -75,7 +83,6 @@ public class BankProxy {
                             tuple.y.state = true;
                             tuple.x.interrupt();
                         }
-                        default -> System.out.println(msg);
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
