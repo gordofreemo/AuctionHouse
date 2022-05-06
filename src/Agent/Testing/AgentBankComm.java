@@ -14,28 +14,43 @@ public class AgentBankComm implements Runnable {
     private ObjectOutputStream out;
 
     public static void main(String[] args) throws IOException{
-        String hostName = "100.64.0.230";
+        String hostName = "10.88.174.104";
         int portNumber = 51362;
         String info = "Name:Bob" + '\n' + "Balance:100";
         //Message outMsg = new Message(AGENT, ESTABLISH_CONNECTION, info);
+        System.out.println(info);
 
-        try(Socket socket = new Socket(hostName, portNumber);
+        try {
+            System.out.println("0");
+            Socket socket = new Socket(hostName, portNumber);
+            System.out.println("1");
+            Thread.sleep(2000);
             ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-            ObjectInputStream in = new ObjectInputStream(socket.getInputStream()))
-        {
+            System.out.println("2");
+            out.flush();
+            ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+
+            System.out.println("3");
             BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
             Message outMsg = new Message(Origin.AGENT, Type.ESTABLISH_CONNECTION, info);
             System.out.println("Sending message to Bank");
+            Thread.sleep(1000);
             out.writeObject(outMsg);
+            out.flush();
+
 
             try {
-                Object test = in.readObject();
-                System.out.println(test);
+                Message response = (Message) in.readObject();
+                System.out.println(response);
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
 
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+
+        System.out.println("Made it passed the try statement");
     }
     @Override
     public void run() {
