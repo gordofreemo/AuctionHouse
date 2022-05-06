@@ -11,10 +11,8 @@ public class Bank {
             while (true) {
                 // Create new thread to handle each client
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("New socket connection from " + clientSocket.getRemoteSocketAddress());
-                BankInit kk = new BankInit(clientSocket);
-                Thread t = new Thread(kk);
-                t.start();
+                System.out.println("New socket connection from " + clientSocket.getInetAddress().getHostAddress());
+                new Thread(new BankInit(clientSocket)).start();
             }
         }
     }
