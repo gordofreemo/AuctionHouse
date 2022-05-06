@@ -9,17 +9,19 @@ import java.io.Serializable;
  */
 
 public class Item implements Serializable {
-    public long houseID;
+    public int auctionID;
     public String description;
+    public int currentBid;
 
-    public Item(String description, long houseID) {
+    public Item(String description, int auctionID) {
         this.description = description;
-        this.houseID     = houseID;
+        this.auctionID = auctionID;
+        currentBid = 0;
     }
 
     @Override
     public String toString() {
-        return description + ". HouseID: " + houseID;
+        return description + ". AuctionID: " + auctionID;
     }
 
     @Override
@@ -27,7 +29,7 @@ public class Item implements Serializable {
         if(obj.getClass() != Item.class) return false;
         Item item = (Item) obj;
         boolean b1 = item.description == this.description;
-        boolean b2 = item.houseID == this.houseID;
+        boolean b2 = item.auctionID == this.auctionID;
         return b1 && b2;
     }
 }

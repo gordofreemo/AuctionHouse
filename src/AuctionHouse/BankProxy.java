@@ -20,6 +20,7 @@ public class BankProxy {
     public BankProxy(ObjectInputStream in, ObjectOutputStream out) {
         this.out = out;
         listener = new BankListener(in);
+        awaits = new HashMap<>();
         new Thread(listener).start();
     }
 
@@ -64,14 +65,15 @@ public class BankProxy {
                     switch (msg.getType()) {
                         case BID_FAILED -> {
                             int id = Integer.parseInt(msg.getBody());
-                            AsyncHelper await = awaits.get(id).y;
-                            await.state = false;
-
+                            Tuple<Thread, AsyncHelper> tuple = awaits.get(id);
+                            tuple.y.state = false;
+                            tuple.x.interrupt();
                         }
                         case BID_WIN -> {
                             int id = Integer.parseInt(msg.getBody());
-                            AsyncHelper await = awaits.get(id).y;
-                            await.state = true;
+                            Tuple<Thread, AsyncHelper> tuple = awaits.get(id);
+                            tuple.y.state = true;
+                            tuple.x.interrupt();
                         }
                         default -> System.out.println(msg);
                     }
