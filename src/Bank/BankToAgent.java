@@ -1,8 +1,10 @@
 package Bank;
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 
 import util.Message;
 import util.MessageEnums.*;
@@ -20,15 +22,14 @@ public class BankToAgent implements Runnable{
     private int id;
     private boolean running = true;
 
-    public BankToAgent(Socket clientSocket, ObjectInputStream in, Message msg) throws IOException {
-        System.out.println("Agent connection recieved from " + clientSocket.getInetAddress().getHostAddress());
+    public BankToAgent(Socket clientSocket, ObjectOutputStream out, ObjectInputStream in, Message msg) throws IOException {
+        System.out.println("Agent connection detected");
 
         // Register thread with bank state tracker
         BankState.getInstance().addAgentThread(this);
 
         this.clientSocket = clientSocket;
-        out = new ObjectOutputStream(clientSocket.getOutputStream());
-        out.flush();
+        this.out = out;
         this.in = in;
 
         // establish conection
@@ -42,7 +43,7 @@ public class BankToAgent implements Runnable{
             try {
                 Message msg = (Message) in.readObject();
                 switch ((Type) msg.getType()) {
-                    case CHECK_FUNDS: // send response message to the auction house
+                    case CHECK_FUNDS -> {
                         System.out.println("Checking funds");
                         String[] body = msg.getBody().split("\n");
 
@@ -54,15 +55,21 @@ public class BankToAgent implements Runnable{
                         catch (Exception e) {
                             e.printStackTrace();
                         }
-                        break;
-                    case BID_WIN:
+                    }
 
-                        break;
-                    case CLOSE_CONNECTION:
-                        running = true;
-                        break;
-                    default: break;
+                    case BID_WIN -> {
+
+                    }
+
+                    case CLOSE_CONNECTION -> {
+                        closeConnection();
+                    }
+
+                    default -> {}
                 }
+            }
+            catch (EOFException | SocketException e) {
+                closeConnection();
             }
             catch (Exception e) {
                 e.printStackTrace();
@@ -112,8 +119,14 @@ public class BankToAgent implements Runnable{
         return Type.BID_SUCCESS;
     }
 
-    public void releaseFunds() {
-        balance += blocked;
-        blocked = 0;
+    public void releaseFunds(int amount, int id) {
+        blocked -= amount;
+        balance += amount;
+    }
+
+    private void closeConnection() {
+        System.out.println("Socket closed, ending thread");
+        BankState.getInstance().removeAgentThread(id);
+        running = false;
     }
 }
