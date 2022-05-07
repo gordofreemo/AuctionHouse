@@ -15,6 +15,7 @@ public class SenderClient {
         Socket socket = new Socket("127.0.0.1", 4001);
         ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
         ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+
         Scanner sc = new Scanner(System.in);
         while(true) {
             Message message = new Message(Origin.AGENT, null, "");
@@ -35,9 +36,30 @@ public class SenderClient {
                 message.setBody(body);
                 out.writeObject(message);
             }
-            Message returnMessage = (Message) in.readObject();
-            System.out.println(returnMessage);
+            Message read = (Message) in.readObject();
+            System.out.println(read);
         }
 
+    }
+
+    private static class MessageListener implements Runnable {
+        private ObjectInputStream stream;
+        public MessageListener(ObjectInputStream stream) {
+            this.stream = stream;
+        }
+
+        @Override
+        public void run() {
+            while(true) {
+                try {
+                    Message message = (Message) stream.readObject();
+                    System.out.println(message);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

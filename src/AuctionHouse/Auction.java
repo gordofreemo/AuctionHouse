@@ -8,8 +8,8 @@ package AuctionHouse;
 
 public class Auction {
     private Item item;
-    private long currBid;
-    private final double bidScale = 1.25; // for now : must bid at least (1.25 * currBid) to count
+    private int currBid;
+    private int prevBid;
     private static int idCount = 0;
     private int auctionID;
     private AgentProxy bidder;
@@ -18,10 +18,11 @@ public class Auction {
     private Thread countdown;
 
     public Auction(String description) {
-        this.auctionID = idCount;
-        this.item = new Item(description, idCount);
+        auctionID = idCount;
+        item = new Item(description, idCount);
         idCount++;
-        this.currBid = 0;
+        currBid = 0;
+        prevBid = 0;
         counterRun = makeCountdown();
         countdown = new Thread(counterRun);
     }
@@ -48,6 +49,10 @@ public class Auction {
         return prevBidder;
     }
 
+    public int getPrevBid() {
+        return prevBid;
+    }
+
     /**
      * When calling this method, the bid should be verified through the use
      * of talking with the bank and by calling the validBid
@@ -56,7 +61,8 @@ public class Auction {
      */
     public synchronized void makeBid(AgentProxy agent, int amount) {
         countdown.interrupt();
-        this.currBid = amount;
+        prevBid = currBid;
+        currBid = amount;
         item.currentBid = amount;
         prevBidder = bidder;
         bidder = agent;
@@ -65,8 +71,7 @@ public class Auction {
     }
 
     public boolean validBid(int amount) {
-        if(amount < currBid * bidScale) return false;
-        return true;
+        return amount > currBid;
     }
 
     // make the countdown thread to inform bid winner
@@ -83,7 +88,7 @@ public class Auction {
 
     private void endAuction() {
         bidder.alertWin(this);
-    };
+    }
 
     @Override
     public String toString() {

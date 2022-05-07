@@ -21,10 +21,14 @@ public class BankProxy {
     public BankProxy(String hostname, int port) throws IOException {
         Socket socket = new Socket(hostname, port);
         out = new ObjectOutputStream(socket.getOutputStream());
-        out.writeObject(new Message(origin, Type.ESTABLISH_CONNECTION, "The Shop"));
         listener = new BankListener(new ObjectInputStream(socket.getInputStream()));
-        awaits = new HashMap<>();
         new Thread(listener).start();
+        out.writeObject(new Message(origin, Type.ESTABLISH_CONNECTION, "The Shop"));
+        awaits = new HashMap<>();
+    }
+
+    public int getAccountID() {
+        return accountID;
     }
 
     public boolean blockFunds(int agentID, int amount) {
@@ -45,7 +49,9 @@ public class BankProxy {
     }
 
     public void unblockFunds(int agentID, int amount) {
-
+        Message message = new Message(origin, Type.UNBLOCK_FUNDS, "");
+        message.setBody("" + amount + '\n' + agentID);
+        sendMessage(message);
     }
 
     private void sendMessage(Message message) {
@@ -77,12 +83,13 @@ public class BankProxy {
                             tuple.y.state = false;
                             tuple.x.interrupt();
                         }
-                        case BID_WIN -> {
+                        case BID_SUCCESS -> {
                             int id = Integer.parseInt(msg.getBody());
                             Tuple<Thread, AsyncHelper> tuple = awaits.get(id);
                             tuple.y.state = true;
                             tuple.x.interrupt();
                         }
+                        case ACKNOWLEDGE_CONNECTION -> accountID = Integer.parseInt(msg.getBody());
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -97,13 +104,10 @@ public class BankProxy {
         public boolean state;
         @Override
         public void run() {
-            while(true) {
                 try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    return;
-                }
-            }
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {}
         }
     }
+
 }

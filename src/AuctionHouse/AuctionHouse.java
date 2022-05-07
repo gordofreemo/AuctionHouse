@@ -17,6 +17,7 @@ public class AuctionHouse {
     private ArrayList<AgentProxy> connectedAgents;
     private ItemNameGen nameGen;
     private BankProxy bank;
+    private int houseID;
 
     public AuctionHouse() throws IOException {
         auctionList = new ArrayList<>();
@@ -44,9 +45,12 @@ public class AuctionHouse {
      * @param auctionID - auction in which an agent has just been outbid on
      */
     public void alertOutbid(int auctionID) {
-        Message message = new Message(Origin.AUCTIONHOUSE, Type.BID_OUTBID, "\nOutbid in auction w/ id" + auctionID);
-        AgentProxy prev = getAuction(auctionID).getPrevBidder();
+        Message message = new Message(Origin.AUCTIONHOUSE, Type.BID_OUTBID, "");
+        message.setBody(houseID + "\n" + auctionID);
+        Auction auction = getAuction(auctionID);
+        AgentProxy prev = auction.getPrevBidder();
         if(prev == null) return;
+        bank.unblockFunds(prev.getAgentID(), auction.getPrevBid());
         prev.messageRequest(message);
     }
 
@@ -77,10 +81,11 @@ public class AuctionHouse {
     public static void main(String[] args) throws IOException {
         AuctionHouse auctionHouse = new AuctionHouse();
         int serverPort = 4001;
-        String bankHostname = "10.88.174.104";
+        String bankHostname = "localhost";
         int bankPort = 51362;
 
         auctionHouse.bank = new BankProxy(bankHostname, bankPort);
+        auctionHouse.houseID = auctionHouse.bank.getAccountID();
 
         try (ServerSocket server = new ServerSocket(serverPort)) {
             while(true) {

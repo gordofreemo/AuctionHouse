@@ -39,13 +39,13 @@ Initial Connection
 \begin{enumerate}
 	\item[]\emph{Origin:} Origin.AGENT
 	\item[]\emph{Type: } Type.ESTABLISH\_CONNECTION 
-	\item[]\emph{Body: } Will probably need to specify the bank account number here, not sure yet
+	\item[]\emph{Body: } Bank Account ID number should be provided here  
 	\item[]\emph{Info: } N/A 
 \end{enumerate}
 \emph{Message (AH$\to$Agent) Format} 
 \begin{enumerate}
 	\item[]\emph{Origin:} Origin.AUCTIONHOUSE 
-	\item[]\emph{Type: } Some kind of Acknowledgement enum (not implemented yet) 
+	\item[]\emph{Type: } Type.ACKNOWLEDGE\_CONNECTION
 	\item[]\emph{Body: } N/A 
 	\item[]\emph{Info: } N/A 
 \end{enumerate}
@@ -70,14 +70,9 @@ Getting Items
 \emph{Message (AH$\to$Agent) Format} 
 \begin{enumerate}
 	\item[]\emph{Origin:} Origin.AUCTIONHOUSE
-	\item[]\emph{Type:} Probably some kind of send\_items enum, not implemented yet
+	\item[]\emph{Type:} Type.SEND\_ITEMS
 	\item[]\emph{Body:} N/A
-	\item[]\emph{Info:} I don't have a complete idea for this yet, but here are the three main ones I've thought of: 
-		\begin{enumerate}
-			\item Just send the Auction object (probably a bad idea for encapsulation reasons) 
-			\item Send a string with the data needed (probably a bad idea because it would be annoying to parse) 
-			\item Create a new ``AuctionInfo'' class to hold the information agent would need, and send that (probably the best idea) 
-		\end{enumerate}
+	\item[]\emph{Info:} Sends a list of objects of type ``Item'' 
 \end{enumerate} 
 
 \vspace{1cm} 
@@ -109,14 +104,14 @@ Bidding
 \large
 Winning a Bid 
 \normalsize
-\\ In this case, the agent does not send a message, but just gets one whenever it wins. No response is necessary (yet), so the agent just needs to process this on its own. 
+\\ In this case, the agent does not send a message, but just gets one whenever it wins. Although a response to to the auction house is not necessary, it is necessary to send a message to the bank in order to transfer the funds to the auction house. 
 \footnotesize
 \\\emph{Message (AH$\to$Agent) Format} 
 \begin{enumerate} 
 	\item[]\emph{Origin:} Origin.AUCTIONHOUSE
 	\item[]\emph{Type:} probably an enum like ``bid\_won'', not implemented yet 
-	\item[]\emph{Body:} N/A 
-	\item[]\emph{Info:} Will probably be an ``AuctionInfo'' object as described in the getting items message, still need to work out a format for that. 
+	\item[]\emph{Body:} ID number of the auction house, sent to the bank in order to transfer funds (this ID is also the AH bank account id) 
+	\item[]\emph{Info:} Will send an Item object over 
 \end{enumerate}
 
 \vspace{1cm} 
@@ -124,10 +119,18 @@ Winning a Bid
 \large
 Outbid by other agent 
 \normalsize
-\\ I haven't though about or implemented too much of this feature, but will update in future. 
+\\Upon getting outbid, the agent will receive a message letting them know they have been outbid, and the AH will take care of unblocking the funds for the agent, no response should be necessary. 
+\footnotesize
+\\\emph{Message (AH$\to$AGENT) Format} 
+\begin{enumerate}
+	\item[]\emph{Origin:} Origin.AUCTIONHOUSE
+	\item[]\emph{Type:} BID\_OUTBID 
+	\item[]\emph{Body:} first line is auction house id, second line is auction ID
+	\item[]\emph{Info:} N/A 
+\end{enumerate}
 
 \vspace{1cm}
-
+\normalsize
 \large
 Closing Connection 
 \normalsize
