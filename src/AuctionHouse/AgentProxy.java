@@ -5,6 +5,7 @@ import util.MessageEnums.Origin;
 import util.MessageEnums.Type;
 
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
 
@@ -28,6 +29,13 @@ public class AgentProxy {
 
     public int getAgentID() {
         return agentID;
+    }
+
+    /**
+     * Closes the socket connection associated with the agent
+     */
+    public void killConnection() {
+        auctionHouse.endConnection(this);
     }
 
     /**
@@ -78,9 +86,9 @@ public class AgentProxy {
     public void sendItems() {
         List<Item> itemList = auctionHouse.getAuctions()
                 .stream().map(Auction::getItem).toList();
-        String auctions = "\n";
-        for(Auction auction : auctionHouse.getAuctions()) auctions += auction.toString() + '\n';
-        Message message = new Message(ORIGIN, Type.SEND_ITEMS, auctions);
+        StringBuilder auctions = new StringBuilder("\n");
+        for(Auction auction : auctionHouse.getAuctions()) auctions.append(auction.toString()).append('\n');
+        Message message = new Message(ORIGIN, Type.SEND_ITEMS, auctions.toString());
         message.setInfo(itemList);
         sendMessage(message);
     }

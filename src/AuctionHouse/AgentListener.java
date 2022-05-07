@@ -2,7 +2,9 @@ package AuctionHouse;
 
 import util.Message;
 
+import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.net.SocketException;
 import java.util.Scanner;
 
 /**
@@ -17,6 +19,7 @@ public class AgentListener implements Runnable {
         this.in = in;
         this.proxy = proxy;
     }
+
 
     /**
      * When receiving the bid message, parse the message for the amount
@@ -46,6 +49,11 @@ public class AgentListener implements Runnable {
                 }
             }
         }
-        catch (Exception e) {}
+        catch (SocketException e) {
+            proxy.killConnection();
+        }
+        catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
     }
 }

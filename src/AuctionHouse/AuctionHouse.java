@@ -3,6 +3,7 @@ package AuctionHouse;
 import util.Message;
 import util.MessageEnums.Type;
 import util.MessageEnums.Origin;
+import util.Tuple;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -14,7 +15,7 @@ import java.util.List;
 
 public class AuctionHouse {
     private ArrayList<Auction> auctionList;
-    private ArrayList<AgentProxy> connectedAgents;
+    private ArrayList<Tuple<Socket, AgentProxy>> connectedAgents;
     private ItemNameGen nameGen;
     private BankProxy bank;
     private int houseID;
@@ -52,6 +53,21 @@ public class AuctionHouse {
         if(prev == null) return;
         bank.unblockFunds(prev.getAgentID(), auction.getPrevBid());
         prev.messageRequest(message);
+    }
+
+    public void endConnection(AgentProxy agent) {
+        Tuple<Socket, AgentProxy> connection = null;
+        for (Tuple<Socket, AgentProxy> connectedAgent : connectedAgents) {
+            if (connectedAgent.y == agent) connection = connectedAgent;
+        }
+        if(connection == null) return;
+        try {
+            connection.x.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Closed connection w/ agent " + connection.y.getAgentID());
+        connectedAgents.remove(connection);
     }
 
     /**
@@ -95,7 +111,7 @@ public class AuctionHouse {
                 Message message = (Message)in.readObject();
                 int agentID = Integer.parseInt(message.getBody());
                 AgentProxy newProxy = new AgentProxy(out, auctionHouse, agentID);
-                auctionHouse.connectedAgents.add(newProxy);
+                auctionHouse.connectedAgents.add(new Tuple<>(socket, newProxy));
                 new Thread(new AgentListener(in, newProxy)).start();
             }
         } catch (Exception e) { e.printStackTrace(); }
