@@ -49,10 +49,16 @@ public class Auction {
         return prevBidder;
     }
 
+    /**
+     * @return - the agent who bid previously on this auction
+     */
     public int getPrevBid() {
         return prevBid;
     }
 
+    /**
+     * @return - the agent with the current highest bid on this auction
+     */
     public AgentProxy getBidder() {
         return bidder;
     }
@@ -60,8 +66,8 @@ public class Auction {
     /**
      * When calling this method, the bid should be verified through the use
      * of talking with the bank and by calling the validBid
-     * @param agent
-     * @param amount
+     * @param agent - agent which is making the bid
+     * @param amount - amount which the agent is bidding
      */
     public synchronized void makeBid(AgentProxy agent, int amount) {
         countdown.interrupt();
@@ -74,22 +80,32 @@ public class Auction {
         countdown.start();
     }
 
+    /**
+     * @param amount - amount that is requesting to be bid
+     * @return - true if bid is over minimum bid, false otherwise
+     */
     public boolean validBid(int amount) {
         return amount > currBid;
     }
 
-    // make the countdown thread to inform bid winner
+    /**
+     * @return - a new runnable object that counts for 30 seconds, and when it
+     * is finished it ends the current auction
+     */
     private Runnable makeCountdown() {
         return () -> {
             try {
                 Thread.sleep(10000);
             } catch (InterruptedException e) {
-                return;
+                e.printStackTrace();
             }
             endAuction();
         };
     }
 
+    /**
+     * Alert the current highest bidder that he has won the auction
+     */
     private void endAuction() {
         bidder.alertWin(this);
     }

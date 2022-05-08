@@ -5,7 +5,6 @@ import util.MessageEnums.Origin;
 import util.MessageEnums.Type;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
 
@@ -27,6 +26,9 @@ public class AgentProxy {
         sendMessage(new Message(Origin.AUCTIONHOUSE, Type.ACKNOWLEDGE_CONNECTION,"hello agent"));
     }
 
+    /**
+     * @return - bank account ID of the current agent
+     */
     public int getAgentID() {
         return agentID;
     }
@@ -93,6 +95,12 @@ public class AgentProxy {
         sendMessage(message);
     }
 
+    /**
+     * Used to verify whether this agent is able to safely close the connection
+     * with the auction house. Checks whether there are any active bids,
+     * if there are it sends a message to the agent saying it cannot close the
+     * socket, otherwise tells the agent that it can.
+     */
     public void tryClose() {
         Message message = new Message(ORIGIN, null, "");
         List<Auction> auctions = auctionHouse.getAuctions();
@@ -101,6 +109,7 @@ public class AgentProxy {
         else message.setType(Type.CAN_CLOSE);
         sendMessage(message);
     }
+
     /**
      * Method that is used by outside classes to send a given message to the
      * agent. Might remove this in favor of message system encapsulation

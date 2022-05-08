@@ -13,6 +13,11 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class representing the auction house server. Connects to the bank for a
+ * start and then processes connections made by agents.
+ */
+
 public class AuctionHouse {
     private ArrayList<Auction> auctionList;
     private ArrayList<Tuple<Socket, AgentProxy>> connectedAgents;
@@ -37,6 +42,14 @@ public class AuctionHouse {
         return auctionList;
     }
 
+    /**
+     * Attempts to block funds from the bank for a given agent. Calling this
+     * will block the current thread until it gets a response back.
+     * @param agentID - agent to block funds from
+     * @param amount - amount to block
+     * @return - returns true if block was successful, false if agent did
+     * not have enough funds and block was not successful
+     */
     public boolean blockFunds(int agentID, int amount) {
         return bank.blockFunds(agentID, amount);
     }
@@ -55,6 +68,10 @@ public class AuctionHouse {
         prev.messageRequest(message);
     }
 
+    /**
+     * Closes the socket associated with a given agent connection
+     * @param agent - agent to close connection with
+     */
     public void endConnection(AgentProxy agent) {
         Tuple<Socket, AgentProxy> connection = null;
         for (Tuple<Socket, AgentProxy> connectedAgent : connectedAgents) {
