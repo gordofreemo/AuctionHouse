@@ -53,6 +53,10 @@ public class Auction {
         return prevBid;
     }
 
+    public AgentProxy getBidder() {
+        return bidder;
+    }
+
     /**
      * When calling this method, the bid should be verified through the use
      * of talking with the bank and by calling the validBid

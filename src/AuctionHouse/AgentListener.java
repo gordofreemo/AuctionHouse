@@ -46,6 +46,7 @@ public class AgentListener implements Runnable {
                 switch(message.getType()) {
                     case MAKE_BID -> parseBid(message);
                     case GET_ITEMS -> proxy.sendItems();
+                    case CAN_CLOSE -> proxy.tryClose();
                 }
             }
         }

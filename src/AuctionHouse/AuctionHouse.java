@@ -87,11 +87,10 @@ public class AuctionHouse {
      * @return - auction object w/ given auctionID
      */
     private Auction getAuction(int auctionID) {
-        Auction get = null;
         for(Auction auction : auctionList) {
-            if(auction.getAuctionID() == auctionID) get = auction;
+            if(auction.getAuctionID() == auctionID) return auction;
         }
-        return get;
+        return null;
     }
 
     public static void main(String[] args) throws IOException {

@@ -93,6 +93,14 @@ public class AgentProxy {
         sendMessage(message);
     }
 
+    public void tryClose() {
+        Message message = new Message(ORIGIN, null, "");
+        List<Auction> auctions = auctionHouse.getAuctions();
+        boolean active = auctions.stream().anyMatch(e -> e.getBidder() == this);
+        if(active) message.setType(Type.CANT_CLOSE);
+        else message.setType(Type.CAN_CLOSE);
+        sendMessage(message);
+    }
     /**
      * Method that is used by outside classes to send a given message to the
      * agent. Might remove this in favor of message system encapsulation

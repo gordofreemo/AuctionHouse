@@ -109,7 +109,7 @@ Winning a Bid
 \\\emph{Message (AH$\to$Agent) Format} 
 \begin{enumerate} 
 	\item[]\emph{Origin:} Origin.AUCTIONHOUSE
-	\item[]\emph{Type:} probably an enum like ``bid\_won'', not implemented yet 
+	\item[]\emph{Type:} BID\_WON
 	\item[]\emph{Body:} ID number of the auction house, sent to the bank in order to transfer funds (this ID is also the AH bank account id) 
 	\item[]\emph{Info:} Will send an Item object over 
 \end{enumerate}
@@ -134,6 +134,21 @@ Outbid by other agent
 \large
 Closing Connection 
 \normalsize
-\\ I haven't though about this one too much either, will update in future. 
+\\Closing a connection is handled by the Auction House at any point in time, but in order to ensure that this is handled smoothly, the agent should double check that they have no active bid, which is what this message does. When sending the can\_close message, the auction house will check and see if the agent has any active bids and respond accordingly. 
+\footnotesize
+\\\emph{Message (AGENT$\to$AH) Format} 
+\begin{enumerate} 
+	\item[]\emph{Origin:} Origin.AGENT 
+	\item[]\emph{Type:} CHECK\_CLOSE
+	\item[]\emph{Body:} N/A 
+	\item[]\emph{Info:} N/A 
+\end{enumerate} 
+\emph{Message (AH$\to$AGENT) Format} 
+\begin{enumerate} 
+	\item[]\emph{Origin:} Origin.AUCTIONHOUSE
+	\item[]\emph{Type:} CAN\_CLOSE or CANT\_CLOSE 
+	\item[]\emph{Body:} N/A
+	\item[]\emph{Info:} N/A 
+\end{enumerate}
 
 \end{document}
