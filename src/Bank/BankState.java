@@ -88,4 +88,12 @@ public class BankState {
             }
         }
     }
+
+    public void transferFunds(int agentId, int auctionHouseId, int amount) {
+        for (var AuctionHouseThread : AuctionHouseThreads) {
+            if (AuctionHouseThread.getId() == id) {
+                AuctionHouseThread.addFunds(amount);
+            }
+        }
+    }
 }

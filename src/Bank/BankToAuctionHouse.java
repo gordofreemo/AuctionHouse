@@ -101,6 +101,10 @@ public class BankToAuctionHouse implements Runnable {
         return id;
     }
 
+    public void addFunds(int amount) {
+        balance += amount;
+    }
+
     public String getAddress() {
         return clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort();
     }
