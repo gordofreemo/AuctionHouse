@@ -58,7 +58,17 @@ public class BankToAgent implements Runnable{
                     }
 
                     case BID_WIN -> {
+                        String[] body = msg.getBody().split("\n");
+                        int auctionHouseID = Integer.parseInt(body[0]);
+                        int transferAmount = Integer.parseInt(body[1]);
 
+                        try {
+                            BankState.getInstance().transferFunds(id, auctionHouseID, transferAmount);
+                            blocked -= transferAmount;
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
 
                     case CLOSE_CONNECTION -> {
