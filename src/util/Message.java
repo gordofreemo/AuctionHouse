@@ -26,6 +26,10 @@ public class Message implements Serializable {
         return type;
     }
 
+    public Object getInfo() {
+        return info;
+    }
+
     public String getBody() {
         return body;
     }
