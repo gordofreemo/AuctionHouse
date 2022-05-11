@@ -21,7 +21,7 @@ public class Item implements Serializable {
 
     @Override
     public String toString() {
-        return description + ". AuctionID: " + auctionID;
+        return description + ". AuctionID: " + auctionID + " current bid " + currentBid;
     }
 
     @Override
