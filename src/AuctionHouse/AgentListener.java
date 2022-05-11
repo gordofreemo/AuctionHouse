@@ -31,6 +31,7 @@ public class AgentListener implements Runnable {
         Integer amount = Integer.parseInt(sc.nextLine());
         Integer auctionID = Integer.parseInt(sc.nextLine());
         proxy.makeBid(amount, auctionID);
+        proxy.sendItems();
     }
 
     /**

@@ -23,12 +23,12 @@ public class BankProxy {
     private BankListener listener;
     private HashMap<Integer, Tuple<Thread, AsyncHelper>> awaits;
 
-    public BankProxy(String hostname, int port) throws IOException {
+    public BankProxy(String hostname, int port, int hostPort) throws IOException {
         Socket socket = new Socket(hostname, port);
         out = new ObjectOutputStream(socket.getOutputStream());
         listener = new BankListener(new ObjectInputStream(socket.getInputStream()));
         new Thread(listener).start();
-        out.writeObject(new Message(origin, Type.ESTABLISH_CONNECTION, "The Shop"));
+        out.writeObject(new Message(origin, Type.ESTABLISH_CONNECTION, "The Shop\n"+hostPort));
         awaits = new HashMap<>();
     }
 

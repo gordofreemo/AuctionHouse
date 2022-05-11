@@ -110,13 +110,20 @@ public class AuctionHouse {
         return null;
     }
 
+    /**
+     * @param args - command line argument format:
+     *             args[0] - bank hostname
+     *             args[1] - bank port number
+     *             args[2] - auction house server port
+     * @throws IOException
+     */
     public static void main(String[] args) throws IOException {
         AuctionHouse auctionHouse = new AuctionHouse();
-        int serverPort = 4001;
-        String bankHostname = "localhost";
-        int bankPort = 51362;
+        int serverPort = Integer.parseInt(args[2]);
+        String bankHostname = args[0];
+        int bankPort = Integer.parseInt(args[1]);
 
-        auctionHouse.bank = new BankProxy(bankHostname, bankPort);
+        auctionHouse.bank = new BankProxy(bankHostname, bankPort, serverPort);
         auctionHouse.houseID = auctionHouse.bank.getAccountID();
 
         try (ServerSocket server = new ServerSocket(serverPort)) {
