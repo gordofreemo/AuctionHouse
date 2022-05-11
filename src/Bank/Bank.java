@@ -7,7 +7,7 @@ import java.net.Socket;
 
 public class Bank {
       public static void main(String [] args) throws IOException {
-        int portNumber = 51362;
+        int portNumber = Integer.parseInt(args[0]);
         try (ServerSocket serverSocket = new ServerSocket(portNumber)) {
             // Listen for new clients forever
             while (true) {

@@ -14,6 +14,7 @@ public class BankToAuctionHouse implements Runnable {
     private ObjectOutputStream out;
     private ObjectInputStream in;
     private int id;
+    private int port;
     private int balance = 0;
     private String name;
     private String desc;
@@ -29,7 +30,7 @@ public class BankToAuctionHouse implements Runnable {
         this.out = out;
         this.in = in;
 
-        initHouse(msg);
+        establishConnection(msg);
     }
 
     @Override
@@ -43,6 +44,7 @@ public class BankToAuctionHouse implements Runnable {
                         String[] body = msg.getBody().split("\n");
                         int amount = Integer.parseInt(body[0]);
                         int id = Integer.parseInt(body[1]);
+
                         Message outMsg = new Message(Origin.BANK, BankState.getInstance().blockFunds(amount, id), id + "");
                         try {
                             out.writeObject(outMsg);
@@ -81,9 +83,10 @@ public class BankToAuctionHouse implements Runnable {
         running = false;
     }
 
-    private void initHouse(Message msg) {
+    private void establishConnection(Message msg) {
         String[] body = msg.getBody().split("\n");
         name = body[0];
+        port = Integer.parseInt(body[1]);
         id = BankState.getInstance().getNewId();
 
         System.out.println("name: " + name + "\nid: " + id);
@@ -106,6 +109,6 @@ public class BankToAuctionHouse implements Runnable {
     }
 
     public String getAddress() {
-        return clientSocket.getInetAddress().getHostAddress() + ":" + clientSocket.getPort();
+        return name + ":" + clientSocket.getInetAddress().getHostAddress() + ":" + port;
     }
 }
