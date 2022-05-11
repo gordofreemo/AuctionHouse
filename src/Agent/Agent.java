@@ -21,13 +21,10 @@ public class Agent {
     public long avaliableBalance; // Balance - current bids
     public long pendingBids = 0;
     public int accountNumber = -1; // Set to minus one to make sure we wait until we actually get an account number
-    public AgentToAuction proxy;
     public AgentToBank bank;
-    public List<String> auctionConnects;
     public List<String> statusMessages = new ArrayList<>();
+    public boolean redrawTabsFlag = false;
 
-
-    public List<AuctionHouse> auctionHouses;
 
     /**
      * Build an agent
@@ -39,7 +36,7 @@ public class Agent {
         this.balance = initBalance;
         this.avaliableBalance = initBalance;
 
-        String bankAddress = "100.64.0.230"; //localHost
+        String bankAddress = "100.64.12.168"; //localHost
         int bankPort = 51362;
 
         String info = "Name:" + name + "\nBalance:" + balance;
@@ -65,8 +62,8 @@ public class Agent {
     public AgentToAuction connectToAuctionHouse(String houseToConnectTo) throws IOException {
         String[] addressAndPort = houseToConnectTo.split(":");
 
-        //AgentToAuction house = new AgentToAuction(addressAndPort[0], Integer.parseInt(addressAndPort[1]), getAccountNumber());
-        AgentToAuction house = new AgentToAuction("100.64.0.230", 4001, getAccountNumber(), this, bank);
+        AgentToAuction house = new AgentToAuction(addressAndPort[0], addressAndPort[1], Integer.parseInt(addressAndPort[2]), getAccountNumber(), this, bank);
+        //AgentToAuction house = new AgentToAuction("localhost", 4001, getAccountNumber(), this, bank);
         return house;
     }
 

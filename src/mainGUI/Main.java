@@ -9,10 +9,7 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
@@ -45,13 +42,13 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException, InterruptedException {
         // Make a new agent on start
-        agent = new Agent(100, "Jrod");
+        agent = new Agent(100, "Luke");
         agentName = agent.name;
 
         pullHouseNames();
 
         border.setLeft(showConnectButton());
-        border.setCenter(items());
+        border.setCenter(items(0));
         border.setRight(showBankInfo());
 
         Scene scene = new Scene(border, WIDTH, HEIGHT);
@@ -71,7 +68,14 @@ public class Main extends Application {
      */
     private void repeatingFunctions(ActionEvent actionEvent){
         border.setRight(showBankInfo());
-
+        if(agent.redrawTabsFlag) {
+            try {
+                border.setCenter(items(0));
+                agent.redrawTabsFlag = false;
+            } catch (IOException | InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -161,14 +165,15 @@ public class Main extends Application {
      * @return the button
      */
     public Button auctionListButton(AgentToAuction proxy){
-        String houseName = auctionMap.get(proxy);
+        // String houseName = auctionMap.get(proxy);
+        String houseName = proxy.getHouseName();
         Button auctionButton = new Button(houseName);
         auctionButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
                 currProxy = proxy;
                 try {
-                    border.setCenter(items());
+                    border.setCenter(items(0));
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -192,9 +197,10 @@ public class Main extends Application {
 
     /**
      * Creates the tab panes that holds all the values from the current auciton house
+     * @param index the tab to display first
      * @return
      */
-    public TabPane items() throws IOException, InterruptedException {
+    public TabPane items(int index) throws IOException, InterruptedException {
         TabPane itemPane = new TabPane();
         itemPane.setBorder(new Border(new BorderStroke(Color.BLACK,BorderStrokeStyle.SOLID,
                 CornerRadii.EMPTY, BorderWidths.DEFAULT)));
@@ -202,11 +208,14 @@ public class Main extends Application {
         if(currProxy == null) return itemPane; // Don't try to build the tabs if there are no auction houses
         List<Item> houseItems = agent.getItems(currProxy);
 
+        int i = 0; // Keep track of the tab's index
         for(Item item : houseItems){
-            Tab itemTab = itemTab(item);
+            Tab itemTab = itemTab(item, i++);
             itemPane.getTabs().add(itemTab);
         }
 
+        SingleSelectionModel<Tab> selectionModel = itemPane.getSelectionModel();
+        selectionModel.select(index);
         return itemPane;
     }
 
@@ -215,10 +224,7 @@ public class Main extends Application {
      * @param item the individual object
      * @return the created tab
      */
-    public Tab itemTab(Item item){
-        //@todo get these values from the auction class
-        int currBid = item.currentBid;
-        int minimumBid = currBid + 1;
+    public Tab itemTab(Item item, int index){
 
         String itemName = item.description;
         Tab tab = new Tab(itemName);
@@ -239,10 +245,14 @@ public class Main extends Application {
         itemID.setStyle("-fx-font: 14 arial;");
         itemIDBox.getChildren().add(itemID);
 
+        int currBid = currProxy.getItemBid(item.auctionID);
+        System.out.println(currBid);
+        int minimumBid = currBid + 1;
+
         // Add the current bid price,
         VBox curBidVBox = new VBox();
         curBidVBox.setPadding(new Insets(0,10,0,10));
-        Text curBidText = new Text("Leading bid: $" + 0); //@todo get the current bid from the auction
+        Text curBidText = new Text("Leading bid: $" + currBid); //@todo get the current bid from the auction
         curBidText.setStyle("-fx-font: 14 arial;");
         curBidVBox.getChildren().add(curBidText);
 
@@ -255,13 +265,13 @@ public class Main extends Application {
             @Override
             public void handle(ActionEvent event) {
                 //@todo call make bid function after checking if agent can bid given amount
-                if(typeBid.getText().equals("")) return;
+                if(typeBid.getText().equals("")) return; // Don't allow empty bids
                 int bidAmount = Integer.parseInt(typeBid.getText());
                 if(bidAmount <= agent.avaliableBalance){
                     System.out.println("Bid submitted at a value of: " + bidAmount);
                     try {
                         agent.makeBid(currProxy, bidAmount, item.auctionID);
-                        border.setCenter(items());
+                        border.setCenter(items(index));
                     } catch (InterruptedException | IOException e) {
                         e.printStackTrace();
                     }
