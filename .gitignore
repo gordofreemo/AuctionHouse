@@ -10,3 +10,6 @@
 
 # Ignore IntelliJ "out" directory
 out/*
+
+# Ignore .img file
+*.iml

@@ -6,12 +6,15 @@ import util.MessageEnums.Origin;
 import util.Tuple;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+import java.util.TreeSet;
 
 /**
  * Class representing the auction house server. Connects to the bank for a
@@ -24,11 +27,13 @@ public class AuctionHouse {
     private ItemNameGen nameGen;
     private BankProxy bank;
     private int houseID;
+    private String name;
 
     public AuctionHouse() throws IOException {
         auctionList = new ArrayList<>();
         connectedAgents = new ArrayList<>();
         nameGen = new ItemNameGen("nouns.txt", "adjectives.txt");
+        name = generateName("houseNames.txt");
         auctionList.add(new Auction(nameGen.getItemName()));
         auctionList.add(new Auction(nameGen.getItemName()));
         auctionList.add(new Auction(nameGen.getItemName()));
@@ -110,6 +115,14 @@ public class AuctionHouse {
         return null;
     }
 
+    private String generateName(String filename) throws IOException {
+        ArrayList<String> names = new ArrayList<>();
+        InputStream stream = ClassLoader.getSystemResourceAsStream(filename);
+        Scanner sc = new Scanner(stream);
+        while(sc.hasNext()) names.add(sc.nextLine());
+        stream.close();
+        return names.get((int)(Math.random()*names.size()));
+    }
     /**
      * @param args - command line argument format:
      *             args[0] - bank hostname
@@ -123,7 +136,7 @@ public class AuctionHouse {
         String bankHostname = args[0];
         int bankPort = Integer.parseInt(args[1]);
 
-        auctionHouse.bank = new BankProxy(bankHostname, bankPort, serverPort);
+        auctionHouse.bank = new BankProxy(auctionHouse.name, bankHostname, bankPort, serverPort);
         auctionHouse.houseID = auctionHouse.bank.getAccountID();
 
         try (ServerSocket server = new ServerSocket(serverPort)) {
