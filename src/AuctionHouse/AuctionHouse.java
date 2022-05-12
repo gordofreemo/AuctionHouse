@@ -1,6 +1,5 @@
 package AuctionHouse;
 
-import Agent.AuctionListener;
 import util.Message;
 import util.MessageEnums.Type;
 import util.MessageEnums.Origin;
@@ -15,7 +14,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-import java.util.TreeSet;
 
 /**
  * Class representing the auction house server. Connects to the bank for a
@@ -152,6 +150,7 @@ public class AuctionHouse {
             while(sc.hasNext()) {
                 sc.nextLine();
                 if(auctionHouse.canQuit()) System.exit(0);
+                System.out.println("Can't exit, active bids");
             }
         };
         new Thread(quit).start();
