@@ -78,6 +78,7 @@ public class AgentProxy {
         Item item = auction.getItem();
         auctionHouse.endAuction(auction.getAuctionID());
         Message message = new Message(ORIGIN, Type.BID_WIN, "YOU WON " + item);
+        message.setInfo(item);
         sendMessage(message);
     }
 

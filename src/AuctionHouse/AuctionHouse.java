@@ -129,6 +129,7 @@ public class AuctionHouse {
         stream.close();
         return names.get((int)(Math.random()*names.size()));
     }
+
     /**
      * @param args - command line argument format:
      *             args[0] - bank hostname
