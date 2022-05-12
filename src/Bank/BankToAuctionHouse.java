@@ -20,7 +20,20 @@ public class BankToAuctionHouse implements Runnable {
     private String desc;
     private boolean running = true;
 
-    public BankToAuctionHouse(Socket clientSocket, ObjectOutputStream out, ObjectInputStream in, Message msg) throws IOException {
+    /**
+     * Constructor for BankToAuctionHouse connection
+     * @param clientSocket socket connection to auction house
+     * @param out object output stream from socket
+     * @param in object input stream from socket
+     * @param msg inital message sent to BankInit
+     * @throws IOException
+     */
+    public BankToAuctionHouse(
+        Socket clientSocket,
+        ObjectOutputStream out,
+        ObjectInputStream in,
+        Message msg
+    ) throws IOException {
         System.out.println("Auction House connection detected");
 
         // Register thread with bank state tracker
@@ -33,6 +46,16 @@ public class BankToAuctionHouse implements Runnable {
         establishConnection(msg);
     }
 
+    /**
+     * Main loop for thread. Waits for a message from input stream and then
+     * processes it. Will terminate when told to do so. Has 3 listen triggers:
+     *     MAKE_BID: Informs the bank of when an agent makes a bid,
+     *               automatically blocks those funds. Sends a response if
+     *               successfully blocked, or insufficent funds.
+     *     BID_OUTBID: Informs the bank that an agent has been outbid. Will
+     *                 release their blocked funds.
+     *     CLOSE_CONNECTION: Closes the connection and termiantes the thread
+     */
     @Override
     public void run() {
         while (running) {
@@ -44,8 +67,11 @@ public class BankToAuctionHouse implements Runnable {
                         String[] body = msg.getBody().split("\n");
                         int amount = Integer.parseInt(body[0]);
                         int id = Integer.parseInt(body[1]);
+                        Message outMsg = new Message(
+                            Origin.BANK,
+                            BankState.getInstance().blockFunds(amount, id), id + ""
+                        );
 
-                        Message outMsg = new Message(Origin.BANK, BankState.getInstance().blockFunds(amount, id), id + "");
                         try {
                             out.writeObject(outMsg);
                         }
@@ -58,7 +84,10 @@ public class BankToAuctionHouse implements Runnable {
                         String[] body = msg.getBody().split("\n");
                         int releaseAmount = Integer.parseInt(body[0]);
                         int agentId = Integer.parseInt(body[1]);
-                        BankState.getInstance().releaseFunds(releaseAmount, agentId);
+                        BankState.getInstance().releaseFunds(
+                            releaseAmount,
+                            agentId
+                        );
                     }
 
                     case CLOSE_CONNECTION -> {
@@ -77,12 +106,20 @@ public class BankToAuctionHouse implements Runnable {
         }
     }
 
+    /**
+     * Properly closes the connection and removes the thread from the thread
+     * tracker
+     */
     private void closeConnection() {
         System.out.println("Socket closed, ending thread");
         BankState.getInstance().removeAuctionHouseThread(id);
         running = false;
     }
 
+    /**
+     * Established the connection with the inital message sent to BankInit
+     * @param msg inital message sent to BankInit
+     */
     private void establishConnection(Message msg) {
         String[] body = msg.getBody().split("\n");
         name = body[0];
@@ -100,14 +137,26 @@ public class BankToAuctionHouse implements Runnable {
         }
     }
 
+    /**
+     * Gets the auctions houses ID generated from BankState
+     * @return acution house id
+     */
     public int getId() {
         return id;
     }
 
+    /**
+     * Adds funds to the auction house's balance
+     * @param amount amount to add to balance
+     */
     public void addFunds(int amount) {
         balance += amount;
     }
 
+    /**
+     * Gets the auctionhouses name, host name, and their server port
+     * @return name:hostname:serverport
+     */
     public String getAddress() {
         return name + ":" + clientSocket.getInetAddress().getHostAddress() + ":" + port;
     }

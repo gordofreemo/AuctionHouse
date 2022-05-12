@@ -14,13 +14,28 @@ public class BankInit implements Runnable {
     private ObjectOutputStream out;
     private ObjectInputStream in;
 
-    public BankInit(Socket clientSocket, ObjectOutputStream out, ObjectInputStream in) throws IOException {
+    /**
+     * Constructor to read the first message of a new connection
+     * @param clientSocket socket to new connection
+     * @param out object output stream from socket
+     * @param in object input stream from socket
+     * @throws IOException
+     */
+    public BankInit(
+        Socket clientSocket,
+        ObjectOutputStream out,
+        ObjectInputStream in
+    ) throws IOException {
         this.clientSocket = clientSocket;
         this.out = out;
         this.in = in;
         System.out.println("New bank init thread created");
     }
 
+    /**
+     * Main function, waits for first message and then reads the origin to find
+     * out what type of thread to create
+     */
     @Override
     public void run() {
         try {

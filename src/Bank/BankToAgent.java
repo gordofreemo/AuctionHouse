@@ -22,7 +22,20 @@ public class BankToAgent implements Runnable{
     private int id;
     private boolean running = true;
 
-    public BankToAgent(Socket clientSocket, ObjectOutputStream out, ObjectInputStream in, Message msg) throws IOException {
+    /**
+     * Constructor for a single BankToAgent connection
+     * @param clientSocket socket connection to agent
+     * @param out object output stream from socket
+     * @param in object input stream from socket
+     * @param msg inital message from BankInit
+     * @throws IOException
+     */
+    public BankToAgent(
+        Socket clientSocket,
+        ObjectOutputStream out,
+        ObjectInputStream in,
+        Message msg
+    ) throws IOException {
         System.out.println("Agent connection detected");
 
         // Register thread with bank state tracker
@@ -34,9 +47,19 @@ public class BankToAgent implements Runnable{
 
         // establish conection
         System.out.println("Establishing connection");
-        establishConnection(msg.getBody());
+        establishConnection(msg);
     }
 
+    /**
+     * Main loop for thread. Waits for a message from input stream and then
+     * processes it. Will terminate when told to do so. Has 3 listen triggers:
+     *     CHECK_FUNDS: Checks the funds of an agent and sends it back as a
+     *                  response
+     *     BID_WIN: transfers the blocked funds from an agent to an
+     *              auction house
+     *     GET_HOUSES: returns a list of all auction houses
+     *     CLOSE_CONNECTION: Closes the connection and termiantes the thread
+     */
     @Override
     public void run() {
         while (running) {
@@ -71,10 +94,6 @@ public class BankToAgent implements Runnable{
                         }
                     }
 
-                    case CLOSE_CONNECTION -> {
-                        closeConnection();
-                    }
-
                     case GET_HOUSES -> {
                         List<String> auctionHouses = BankState.getInstance().getAuctionHouses();
                         String addresses = "garbage\n";
@@ -95,6 +114,10 @@ public class BankToAgent implements Runnable{
                         }
                     }
 
+                    case CLOSE_CONNECTION -> {
+                        closeConnection();
+                    }
+
                     default -> {}
                 }
             }
@@ -107,10 +130,14 @@ public class BankToAgent implements Runnable{
         }
     }
 
-    private void establishConnection(String body) {
-        String[] msg = body.split("\n");
-        name = msg[0].split(":")[1];
-        balance = Integer.parseInt(msg[1].split(":")[1]);
+    /**
+     * Established the connection with the inital message sent to BankInit
+     * @param msg inital message sent to BankInit
+     */
+    private void establishConnection(Message msg) {
+        String[] body = msg.getBody().split("\n");
+        name = body[0].split(":")[1];
+        balance = Integer.parseInt(body[1].split(":")[1]);
         id = BankState.getInstance().getNewId();
         System.out.println("name: " + name + "\nbalance: " + balance + "\nid: " + id);
 
@@ -136,10 +163,19 @@ public class BankToAgent implements Runnable{
         }
     }
 
+    /**
+     * Gets the auctions houses ID generated from BankState
+     * @return acution house id
+     */
     public int getId() {
         return id;
     }
 
+    /**
+     * Blocks funds from agent
+     * @param amount amount to block
+     * @return success or failure message
+     */
     public Type blockFunds(int amount) {
         if (amount > balance) {
             return Type.BID_FAILED;
@@ -149,11 +185,19 @@ public class BankToAgent implements Runnable{
         return Type.BID_SUCCESS;
     }
 
-    public void releaseFunds(int amount, int id) {
+    /**
+     * releases blocked funds back to balance
+     * @param amount amount to release
+     */
+    public void releaseFunds(int amount) {
         blocked -= amount;
         balance += amount;
     }
 
+    /**
+     * Gets the auctionhouses name, host name, and their server port
+     * @return name:hostname:serverport
+     */
     private void closeConnection() {
         System.out.println("Socket closed, ending thread");
         BankState.getInstance().removeAgentThread(id);
