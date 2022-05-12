@@ -81,7 +81,7 @@ public class Main extends Application {
 
         if(agent.redrawTabsFlag) {
             try {
-                border.setCenter(items(0));
+                border.setCenter(items(lastIndex));
                 agent.redrawTabsFlag = false;
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();

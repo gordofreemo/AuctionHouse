@@ -25,6 +25,7 @@ public class AgentToAuction {
     private String name;
     private boolean bidAccepted = false;
     private HashMap<Integer, Integer> itemValues = new HashMap<>();
+    private HashMap<Integer, Integer> myBids = new HashMap<>(); // Map the agent's CURRENT bid on an object to that objects item number
 
     AgentToAuction(String name, String address, int port, int id, Agent agent, AgentToBank bank) throws IOException {
         this.bank = bank;
@@ -59,9 +60,12 @@ public class AgentToAuction {
         out.writeObject(bid);
         Thread.sleep(100);
         if(bidAccepted) {
+            myBids.put(id, 0);
+            agent.pendingBids -= myBids.get(id);
             agent.statusMessages.add("You bid $" + amount + " on Item " + id);
             itemValues.put(id, amount);
-            agent.pendingBids += amount;
+            myBids.put(id,amount);
+            agent.pendingBids += myBids.get(id);
             agent.avaliableBalance = agent.balance - agent.pendingBids;
         }
 
@@ -122,11 +126,10 @@ public class AgentToAuction {
                         case BID_WIN -> {
                             String[] bodySplit = inMsg.getBody().split("AuctionID:");
                             String[] secondSplit = inMsg.getBody().split(" ");
-                            int auctionID = Integer.parseInt(secondSplit[secondSplit.length-1]);
+                            int transferAmount = Integer.parseInt(secondSplit[secondSplit.length-1]);
+                            int auctionID = Integer.parseInt(secondSplit[secondSplit.length-4]);
                             agent.statusMessages.add(bodySplit[0]);
                             agent.redrawTabsFlag = true;
-                            Item itemWon = (Item) inMsg.getInfo();
-                            int transferAmount = itemWon.currentBid;
                             agent.bank.sendWin(auctionID, transferAmount);
                             agent.balance -= transferAmount;
                             agent.pendingBids -= transferAmount;
@@ -136,6 +139,9 @@ public class AgentToAuction {
                             String[] info = inMsg.getBody().split("\n");
                             int auctionHouseID = Integer.parseInt(info[0]);
                             int itemID = Integer.parseInt(info[1]);
+                            agent.pendingBids -= myBids.get(itemID); // Remove the previous bid from the agent's pending bids
+                            agent.avaliableBalance += myBids.get(itemID);
+                            myBids.put(itemID, 0); // Since the agent no longer has an active bid on the item
                             agent.statusMessages.add("You have been out bid on Item " + itemID + "!");
                         }
                     }
