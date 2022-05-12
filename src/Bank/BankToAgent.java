@@ -75,6 +75,26 @@ public class BankToAgent implements Runnable{
                         closeConnection();
                     }
 
+                    case GET_HOUSES -> {
+                        List<String> auctionHouses = BankState.getInstance().getAuctionHouses();
+                        String addresses = "garbage\n";
+                        for (var auctionHouse : auctionHouses) {
+                            addresses += auctionHouse + '\n';
+                        }
+
+                        Message outMsg = new Message(
+                                Origin.BANK,
+                                Type.SEND_HOUSES,
+                                addresses
+                        );
+
+                        try{
+                            out.writeObject(outMsg);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+
                     default -> {}
                 }
             }

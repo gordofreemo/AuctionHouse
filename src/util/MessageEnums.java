@@ -47,5 +47,11 @@ public class MessageEnums implements Serializable {
 
         // Agent -> Bank
         CHECK_FUNDS,
+        GET_HOUSES,
+
+        /*
+            Bank -> AH
+         */
+        SEND_HOUSES
     }
 }
