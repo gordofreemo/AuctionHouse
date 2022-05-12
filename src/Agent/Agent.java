@@ -24,7 +24,7 @@ public class Agent {
     public AgentToBank bank;
     public List<String> statusMessages = new ArrayList<>();
     public boolean redrawTabsFlag = false;
-    public boolean sendBankWinFlag = false;
+    private List<String> connectedHouses = new ArrayList<>();
 
 
     /**
@@ -52,6 +52,16 @@ public class Agent {
     public long getPendingBids(){return pendingBids;}
 
     /**
+     * Check if the agent is connected to the given house string
+     * @param auctionHouse
+     * @return
+     */
+    public boolean isConnectedTo(String auctionHouse){
+        if(connectedHouses.contains(auctionHouse)) return true;
+        return false;
+    }
+
+    /**
      * Connect to the given auction house
      * @param houseToConnectTo auction house address and port in bank format
      * @return the new socket
@@ -60,7 +70,7 @@ public class Agent {
         String[] addressAndPort = houseToConnectTo.split(":");
 
         AgentToAuction house = new AgentToAuction(addressAndPort[0], addressAndPort[1], Integer.parseInt(addressAndPort[2]), getAccountNumber(), this, bank);
-        //AgentToAuction house = new AgentToAuction("localhost", 4001, getAccountNumber(), this, bank);
+        connectedHouses.add(houseToConnectTo);
         return house;
     }
 

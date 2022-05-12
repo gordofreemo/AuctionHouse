@@ -4,6 +4,7 @@ import AuctionHouse.Item;
 import util.Message;
 import util.MessageEnums.*;
 
+import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -26,6 +27,7 @@ public class AgentToAuction {
     private boolean bidAccepted = false;
     private HashMap<Integer, Integer> itemValues = new HashMap<>();
     private HashMap<Integer, Integer> myBids = new HashMap<>(); // Map the agent's CURRENT bid on an object to that objects item number
+    public boolean runThread = true;
 
     AgentToAuction(String name, String address, int port, int id, Agent agent, AgentToBank bank) throws IOException {
         this.bank = bank;
@@ -51,9 +53,13 @@ public class AgentToAuction {
         out.writeObject(requestItem);
     }
 
-    public String getHouseName(){ return name; }
-
-
+    /**
+     * Make a bid on the given item
+     * @param amount how much to bid
+     * @param id on which item
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public void makeBid(int amount, int id) throws IOException, InterruptedException {
         String info = amount + "\n" + id;
         Message bid = new Message(Origin.AGENT, Type.MAKE_BID, info);
@@ -100,7 +106,7 @@ public class AgentToAuction {
 
         @Override
         public void run() {
-            while(true){
+            while(runThread){
                 try {
                     Message inMsg = (Message) in.readObject();
                     // System.out.println(inMsg);
@@ -129,10 +135,13 @@ public class AgentToAuction {
                         case BID_WIN -> {
                             String[] bodySplit = inMsg.getBody().split("AuctionID:");
                             String[] secondSplit = inMsg.getBody().split(" ");
+                            // Find out what item we won and how much we spent on int
                             int transferAmount = Integer.parseInt(secondSplit[secondSplit.length-1]);
                             int auctionID = Integer.parseInt(secondSplit[secondSplit.length-4]);
+                            // Alert the user that they won an item
                             agent.statusMessages.add(bodySplit[0]);
                             agent.redrawTabsFlag = true;
+                            // Alert the bank that we won an item
                             agent.bank.sendWin(auctionID, transferAmount);
                             agent.balance -= transferAmount;
                             agent.pendingBids -= transferAmount;
@@ -149,8 +158,12 @@ public class AgentToAuction {
                         }
                     }
 
-                } catch (IOException | ClassNotFoundException e) {
+                } catch(EOFException e){
+                    runThread = false;
+                } catch (SocketException e){
                     System.out.println("Auction House closed");
+                    runThread = false;
+                } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
             }
