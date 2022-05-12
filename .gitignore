@@ -13,3 +13,6 @@ out/*
 
 # Ignore .img file
 *.iml
+
+# Ignore META-INF intellij directory
+META-INF/*

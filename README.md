@@ -43,3 +43,22 @@ from the middle panel. Enter the numerical (whole number) amount you would like 
 area and hit submit. If your bid goes through, your screen will be updated with the new bid information. If the 
 bid failed, then nothing will be updated on the screen. If you are outbid, your funds will be transferred back into 
 your account and you will be alerted about the outbid. 
+
+## How the Program Works 
+#### Communication / Messaging System 
+Each separate component of the program functions a little differently, but the messaging 
+system that we came up with served as the backbone to the rest of the program. The main 
+idea going into this project was we needed a way to abstract the communication between the different 
+components so that an implementation would not need to rely on any specific class or piece of code 
+that somebody else was writing, but rather code to something that would be flexible to change 
+and that lay outside the program. What we came up with was the messaging system 
+for communicating between the agent, auction house, and bank. 
+What each component is responsible for is listening for message objects and 
+responding correctly to each one (or sending one out when some kind of update is needed).
+The structure of the message object is fairly simple, it holds an enum type for the origin of the 
+message (whether bank, auction house, or agent), an enum for the kind of message that is being sent
+(such as making a bid or setting up an account with the bank), a slot for a String containing 
+some sort of extra parsable information (such as a bid amount), and another random Object slot 
+for anything else we might need to send that might not be easily parsable (such as a list of all the items being 
+sold by the auction house). This messaging system is represented by Message.java and MessageEnums.java in the util package. 
+#### Auction House 
