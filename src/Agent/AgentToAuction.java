@@ -46,7 +46,7 @@ public class AgentToAuction {
      * @throws IOException
      */
     public void requestItems() throws IOException {
-        System.out.println("Ask house for list of items");
+        // System.out.println("Ask house for list of items");
         Message requestItem = new Message(Origin.AGENT, Type.GET_ITEMS, "");
         out.writeObject(requestItem);
     }
@@ -103,7 +103,7 @@ public class AgentToAuction {
             while(true){
                 try {
                     Message inMsg = (Message) in.readObject();
-                    System.out.println(inMsg);
+                    // System.out.println(inMsg);
 
                     switch (inMsg.getType()){
                         case ESTABLISH_CONNECTION -> {
@@ -111,12 +111,15 @@ public class AgentToAuction {
                         }
                         case SEND_ITEMS -> {
                             // Get the items as a list, pull the current bid from the body of the message
-                            System.out.println(inMsg.getInfo());
                             String[] bodyNewLineSplit = inMsg.getBody().split("\n");
                             for(int i = 1; i < bodyNewLineSplit.length; i++){
                                 String line = bodyNewLineSplit[i];
                                 String[] lineSplit = line.split(" ");
-                                itemValues.put(Integer.parseInt(lineSplit[1]), Integer.parseInt(lineSplit[lineSplit.length-1]));
+                                int id = Integer.parseInt(lineSplit[1]);
+                                int value = Integer.parseInt(lineSplit[lineSplit.length-1]);
+                                if(!itemValues.containsKey(id)) agent.redrawTabsFlag = true;
+                                else if(itemValues.get(id) != value) agent.redrawTabsFlag = true;
+                                itemValues.put(id, value);
                             }
                             items = (List<Item>) inMsg.getInfo();
                         }

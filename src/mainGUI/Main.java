@@ -20,6 +20,7 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Time;
 import java.util.*;
 
 public class Main extends Application {
@@ -37,6 +38,7 @@ public class Main extends Application {
     public List<AgentToAuction> activeProxies = new ArrayList<>();
     private int lastIndex;
     private Map<Integer, Integer> localItemBidMap = new HashMap<>();
+    private List<Item> localItemCopy = new ArrayList<>();
 
     @Override
     public void start(Stage primaryStage) throws IOException, InterruptedException {
@@ -60,8 +62,8 @@ public class Main extends Application {
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(100), this::repeatingFunctions));
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
-    }
 
+    }
     /**
      * This function is called every .1 seconds. GUI elements that need to be refreshed go here
      * @param actionEvent
@@ -69,16 +71,16 @@ public class Main extends Application {
     private void repeatingFunctions(ActionEvent actionEvent){
         border.setRight(showBankInfo());
 
-        // Once we have connected to the auction houses, redraw their items constantly
-        if(activeProxies != null) {
-
-//            try {
-//                border.setCenter(items(lastIndex));
-//            } catch (IOException | InterruptedException e) {
-//                e.printStackTrace();
-//            }
+        if(currProxy != null){
+            // Ask house for its items
+            try {
+                currProxy.requestItems();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
+        // If agent is telling the gui to redraw, redraw
         if(agent.redrawTabsFlag) {
             try {
                 border.setCenter(items(lastIndex));
@@ -219,7 +221,7 @@ public class Main extends Application {
 
         if(currProxy == null) return itemPane; // Don't try to build the tabs if there are no auction houses
         List<Item> houseItems = agent.getItems(currProxy);
-
+        localItemCopy = houseItems;
         int i = 0; // Keep track of the tab's index
         for(Item item : houseItems){
             Tab itemTab = itemTab(item, i++);
