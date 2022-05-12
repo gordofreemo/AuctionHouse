@@ -45,6 +45,22 @@ public class AgentToBank {
     }
 
     /**
+     * Alert Bank that funds need to be transferred
+     * @param auctionID
+     * @param transferAmount
+     */
+    public void sendWin(int auctionID, int transferAmount){
+        System.out.println("Sending bank win message");
+        String info = auctionID + "\n" + transferAmount;
+        Message outMsg = new Message(Origin.AGENT, Type.BID_WIN, info);
+        try {
+            out.writeObject(outMsg);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Listen to messages from the bank indefinitely
      */
     private class bankListener implements Runnable{
@@ -67,6 +83,11 @@ public class AgentToBank {
                             String info = inMsg.getBody();
                             String[] infoSplit = info.split("\n");
                             agentID = Integer.parseInt(infoSplit[0]);
+                            parseAuctionConnects(infoSplit);
+                        }
+                        case SEND_HOUSES -> {
+                            String info = inMsg.getBody();
+                            String infoSplit[] = info.split("\n");
                             parseAuctionConnects(infoSplit);
                         }
 

@@ -24,6 +24,7 @@ public class Agent {
     public AgentToBank bank;
     public List<String> statusMessages = new ArrayList<>();
     public boolean redrawTabsFlag = false;
+    public boolean sendBankWinFlag = false;
 
 
     /**
@@ -31,18 +32,14 @@ public class Agent {
      * @param initBalance starting balance
      * @param name name of the agent (pulled from list?)
      */
-    public Agent(long initBalance, String name) throws IOException, InterruptedException {
+    public Agent(long initBalance, String name, String bankAddress, int bankPort) throws IOException, InterruptedException {
         this.name = name;
         this.balance = initBalance;
         this.avaliableBalance = initBalance;
 
-        String bankAddress = "100.64.12.168"; //localHost
-        int bankPort = 51362;
-
         String info = "Name:" + name + "\nBalance:" + balance;
         Message bankOutMsg = new Message(Origin.AGENT, Type.ESTABLISH_CONNECTION, info);
         bank = new AgentToBank(bankOutMsg, bankAddress, bankPort);
-
     }
 
     /**

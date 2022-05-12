@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -50,6 +51,7 @@ public class AgentToAuction {
     }
 
     public String getHouseName(){ return name; }
+
 
     public void makeBid(int amount, int id) throws IOException, InterruptedException {
         String info = amount + "\n" + id;
@@ -119,8 +121,15 @@ public class AgentToAuction {
                         }
                         case BID_WIN -> {
                             String[] bodySplit = inMsg.getBody().split("AuctionID:");
+                            String[] secondSplit = inMsg.getBody().split(" ");
+                            int auctionID = Integer.parseInt(secondSplit[secondSplit.length-1]);
                             agent.statusMessages.add(bodySplit[0]);
                             agent.redrawTabsFlag = true;
+                            Item itemWon = (Item) inMsg.getInfo();
+                            int transferAmount = itemWon.currentBid;
+                            agent.bank.sendWin(auctionID, transferAmount);
+                            agent.balance -= transferAmount;
+                            agent.pendingBids -= transferAmount;
                         }
                         case BID_OUTBID -> {
                             agent.redrawTabsFlag = true;
@@ -132,6 +141,7 @@ public class AgentToAuction {
                     }
 
                 } catch (IOException | ClassNotFoundException e) {
+                    System.out.println("Auction House closed");
                     e.printStackTrace();
                 }
             }

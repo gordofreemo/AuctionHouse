@@ -20,10 +20,7 @@ import javafx.util.Duration;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main extends Application {
     public final int WIDTH = 1000;
@@ -38,12 +35,16 @@ public class Main extends Application {
     public HashMap<AgentToAuction, String> auctionMap = new HashMap<>();
     public List<String> allHouseNames = new ArrayList<>();
     public List<AgentToAuction> activeProxies = new ArrayList<>();
+    private int lastIndex;
+    private Map<Integer, Integer> localItemBidMap = new HashMap<>();
 
     @Override
     public void start(Stage primaryStage) throws IOException, InterruptedException {
         // Make a new agent on start
-        agent = new Agent(100, "Luke");
-        agentName = agent.name;
+        agentName = getParameters().getUnnamed().get(2);
+        String bankAddress = getParameters().getUnnamed().get(0);
+        int bankPort = Integer.parseInt(getParameters().getUnnamed().get(1));
+        agent = new Agent(100, agentName, bankAddress, bankPort);
 
         pullHouseNames();
 
@@ -59,7 +60,6 @@ public class Main extends Application {
         Timeline timeline = new Timeline(new KeyFrame(Duration.millis(100), this::repeatingFunctions));
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
-
     }
 
     /**
@@ -68,6 +68,17 @@ public class Main extends Application {
      */
     private void repeatingFunctions(ActionEvent actionEvent){
         border.setRight(showBankInfo());
+
+        // Once we have connected to the auction houses, redraw their items constantly
+        if(activeProxies != null) {
+
+//            try {
+//                border.setCenter(items(lastIndex));
+//            } catch (IOException | InterruptedException e) {
+//                e.printStackTrace();
+//            }
+        }
+
         if(agent.redrawTabsFlag) {
             try {
                 border.setCenter(items(0));
@@ -76,6 +87,7 @@ public class Main extends Application {
                 e.printStackTrace();
             }
         }
+
     }
 
     /**
@@ -216,6 +228,8 @@ public class Main extends Application {
 
         SingleSelectionModel<Tab> selectionModel = itemPane.getSelectionModel();
         selectionModel.select(index);
+        lastIndex = selectionModel.getSelectedIndex();
+
         return itemPane;
     }
 
@@ -245,8 +259,9 @@ public class Main extends Application {
         itemID.setStyle("-fx-font: 14 arial;");
         itemIDBox.getChildren().add(itemID);
 
+        localItemBidMap.put(item.auctionID, item.currentBid);
+
         int currBid = currProxy.getItemBid(item.auctionID);
-        System.out.println(currBid);
         int minimumBid = currBid + 1;
 
         // Add the current bid price,
@@ -347,6 +362,12 @@ public class Main extends Application {
         return vbox;
     }
 
+    /**
+     * arg[0] Bank Address
+     * arg[1] Bank Port
+     * arg[2] Agent Name
+     * @param args
+     */
     public static void main(String[] args) {
         launch(args);
     }
