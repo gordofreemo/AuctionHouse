@@ -38,6 +38,9 @@ public class AuctionHouse {
         auctionList.add(new Auction(nameGen.getItemName()));
     }
 
+    public int getHouseID() {
+        return houseID;
+    }
 
     /**
      * @return - list of all the current auctions
