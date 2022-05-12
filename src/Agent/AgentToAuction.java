@@ -53,9 +53,13 @@ public class AgentToAuction {
         out.writeObject(requestItem);
     }
 
-    public String getHouseName(){ return name; }
-
-
+    /**
+     * Make a bid on the given item
+     * @param amount how much to bid
+     * @param id on which item
+     * @throws IOException
+     * @throws InterruptedException
+     */
     public void makeBid(int amount, int id) throws IOException, InterruptedException {
         String info = amount + "\n" + id;
         Message bid = new Message(Origin.AGENT, Type.MAKE_BID, info);
@@ -131,10 +135,13 @@ public class AgentToAuction {
                         case BID_WIN -> {
                             String[] bodySplit = inMsg.getBody().split("AuctionID:");
                             String[] secondSplit = inMsg.getBody().split(" ");
+                            // Find out what item we won and how much we spent on int
                             int transferAmount = Integer.parseInt(secondSplit[secondSplit.length-1]);
                             int auctionID = Integer.parseInt(secondSplit[secondSplit.length-4]);
+                            // Alert the user that they won an item
                             agent.statusMessages.add(bodySplit[0]);
                             agent.redrawTabsFlag = true;
+                            // Alert the bank that we won an item
                             agent.bank.sendWin(auctionID, transferAmount);
                             agent.balance -= transferAmount;
                             agent.pendingBids -= transferAmount;
