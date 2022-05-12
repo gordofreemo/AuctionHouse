@@ -1,5 +1,6 @@
 package AuctionHouse;
 
+import Agent.AuctionListener;
 import util.Message;
 import util.MessageEnums.Type;
 import util.MessageEnums.Origin;
@@ -97,7 +98,7 @@ public class AuctionHouse {
      * and create a new one
      * @param auctionID - auction to remove
      */
-    public void endAuction(int auctionID) {
+    public synchronized void endAuction(int auctionID) {
         Auction end = getAuction(auctionID);
         auctionList.remove(end);
         auctionList.add(new Auction(nameGen.getItemName()));
@@ -113,6 +114,13 @@ public class AuctionHouse {
             if(auction.getAuctionID() == auctionID) return auction;
         }
         return null;
+    }
+
+    private boolean canQuit() {
+        for(var auction : auctionList) {
+            if(auction.getBidder() != null) return false;
+        }
+        return true;
     }
 
     private String generateName(String filename) throws IOException {
@@ -138,6 +146,15 @@ public class AuctionHouse {
 
         auctionHouse.bank = new BankProxy(auctionHouse.name, bankHostname, bankPort, serverPort);
         auctionHouse.houseID = auctionHouse.bank.getAccountID();
+
+        Runnable quit = () -> {
+            Scanner sc = new Scanner(System.in);
+            while(sc.hasNext()) {
+                sc.nextLine();
+                if(auctionHouse.canQuit()) System.exit(0);
+            }
+        };
+        new Thread(quit).start();
 
         try (ServerSocket server = new ServerSocket(serverPort)) {
             while(true) {
