@@ -23,7 +23,10 @@ public class AgentProxy {
         this.auctionHouse = auctionHouse;
         this.out = out;
         this.agentID = agentID;
-        sendMessage(new Message(Origin.AUCTIONHOUSE, Type.ACKNOWLEDGE_CONNECTION,"hello agent"));
+        Message message = new Message(
+                ORIGIN, Type.ACKNOWLEDGE_CONNECTION, "Agent, Hello"
+        );
+        sendMessage(message);
     }
 
     /**
@@ -78,7 +81,7 @@ public class AgentProxy {
         Item item = auction.getItem();
         item.auctionID = auctionHouse.getHouseID();
         auctionHouse.endAuction(auction.getAuctionID());
-        Message message = new Message(ORIGIN, Type.BID_WIN, "YOU WON " + item);
+        Message message = new Message(ORIGIN, Type.BID_WIN, "YOU WON "+item);
         message.setInfo(item);
         sendMessage(message);
     }
@@ -91,8 +94,12 @@ public class AgentProxy {
         List<Item> itemList = auctionHouse.getAuctions()
                 .stream().map(Auction::getItem).toList();
         StringBuilder auctions = new StringBuilder("\n");
-        for(Auction auction : auctionHouse.getAuctions()) auctions.append(auction.toString()).append('\n');
-        Message message = new Message(ORIGIN, Type.SEND_ITEMS, auctions.toString());
+        for(Auction auction : auctionHouse.getAuctions()) {
+            auctions.append(auction.toString()).append('\n');
+        }
+        Message message = new Message(
+                ORIGIN, Type.SEND_ITEMS, auctions.toString()
+        );
         message.setInfo(itemList);
         sendMessage(message);
     }

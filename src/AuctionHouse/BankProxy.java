@@ -28,7 +28,8 @@ public class BankProxy {
         out = new ObjectOutputStream(socket.getOutputStream());
         listener = new BankListener(new ObjectInputStream(socket.getInputStream()));
         new Thread(listener).start();
-        out.writeObject(new Message(origin, Type.ESTABLISH_CONNECTION, shopName + '\n' + hostPort));
+        String msg = shopName + '\n' + hostPort;
+        out.writeObject(new Message(origin, Type.ESTABLISH_CONNECTION, msg));
         awaits = new HashMap<>();
     }
 
@@ -116,11 +117,11 @@ public class BankProxy {
                             tuple.y.state = true;
                             tuple.x.interrupt();
                         }
-                        case ACKNOWLEDGE_CONNECTION -> accountID = Integer.parseInt(msg.getBody());
+                        case ACKNOWLEDGE_CONNECTION -> {
+                            accountID = Integer.parseInt(msg.getBody());
+                        }
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                } catch (ClassNotFoundException e) {
+                } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
             }

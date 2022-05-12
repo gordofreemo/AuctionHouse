@@ -38,6 +38,9 @@ public class AuctionHouse {
         auctionList.add(new Auction(nameGen.getItemName()));
     }
 
+    /**
+     * @return - bank account ID of the auction house
+     */
     public int getHouseID() {
         return houseID;
     }
@@ -90,7 +93,8 @@ public class AuctionHouse {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println("Closed connection w/ agent " + connection.y.getAgentID());
+        int connectID = connection.y.getAgentID();
+        System.out.println("Closed connection w/ agent " + connectID);
         connectedAgents.remove(connection);
     }
 
@@ -117,6 +121,9 @@ public class AuctionHouse {
         return null;
     }
 
+    /**
+     * @return - true if the program can safely exit, false otherwise
+     */
     private boolean canQuit() {
         for(var auction : auctionList) {
             if(auction.getBidder() != null) return false;
@@ -124,6 +131,13 @@ public class AuctionHouse {
         return true;
     }
 
+    /**
+     * Makes a random name for the AuctionHouse
+     * @param filename - file of list of names for auction houses
+     * @return - String represent new auction house name
+     * @throws IOException - if file is not found or something goes wrong in
+     * reading the file
+     */
     private String generateName(String filename) throws IOException {
         ArrayList<String> names = new ArrayList<>();
         InputStream stream = ClassLoader.getSystemResourceAsStream(filename);
@@ -146,7 +160,9 @@ public class AuctionHouse {
         String bankHostname = args[0];
         int bankPort = Integer.parseInt(args[1]);
 
-        auctionHouse.bank = new BankProxy(auctionHouse.name, bankHostname, bankPort, serverPort);
+        auctionHouse.bank = new BankProxy(
+                auctionHouse.name, bankHostname, bankPort, serverPort
+        );
         auctionHouse.houseID = auctionHouse.bank.getAccountID();
 
         Runnable quit = () -> {
