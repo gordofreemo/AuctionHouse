@@ -28,17 +28,18 @@ public class Main extends Application {
     public final int HEIGHT = 600;
     public Agent agent;
     public BorderPane border = new BorderPane();
-    public AuctionHouse currHouse;
     public AgentToAuction currProxy;
 
     public String agentName = "Agent";
-    public HashMap<AuctionHouse, String> auctionHouseNameMap = new HashMap<>();
-    public HashMap<AgentToAuction, String> auctionMap = new HashMap<>();
     public List<String> allHouseNames = new ArrayList<>();
     public List<AgentToAuction> activeProxies = new ArrayList<>();
     private int lastIndex;
     private Map<Integer, Integer> localItemBidMap = new HashMap<>();
     private List<Item> localItemCopy = new ArrayList<>();
+    private Map<String, AgentToAuction> houseInfoToProxy = new HashMap<>();
+
+    List<String> availableConnects = new ArrayList<>();
+
 
     @Override
     public void start(Stage primaryStage) throws IOException, InterruptedException {
@@ -46,11 +47,12 @@ public class Main extends Application {
         agentName = getParameters().getUnnamed().get(2);
         String bankAddress = getParameters().getUnnamed().get(0);
         int bankPort = Integer.parseInt(getParameters().getUnnamed().get(1));
-        agent = new Agent(100, agentName, bankAddress, bankPort);
+        int initBalance = Integer.parseInt(getParameters().getUnnamed().get(3));
+        agent = new Agent(initBalance, agentName, bankAddress, bankPort);
 
         pullHouseNames();
 
-        border.setLeft(showConnectButton());
+        border.setLeft(showActionHouses());
         border.setCenter(items(0));
         border.setRight(showBankInfo());
 
@@ -71,6 +73,15 @@ public class Main extends Application {
     private void repeatingFunctions(ActionEvent actionEvent){
         border.setRight(showBankInfo());
 
+        // Check if there is a reason we should make the currProxy null
+        if(currProxy != null) {
+            if (!currProxy.runThread) {
+                activeProxies.remove(currProxy);
+                currProxy = null;
+            }
+        }
+
+        // If there isn't a reason (auction house DIDN'T close), request their items
         if(currProxy != null){
             // Ask house for its items
             try {
@@ -89,7 +100,6 @@ public class Main extends Application {
                 e.printStackTrace();
             }
         }
-
     }
 
     /**
@@ -98,23 +108,16 @@ public class Main extends Application {
      */
     public VBox showConnectButton(){
         VBox vbox = new VBox();
-        vbox.setPadding(new Insets(40,40,10,40));
+        vbox.setPadding(new Insets(40,40,10,0));
         vbox.setSpacing(30);
 
-        Text auctionHouseTitleText = new Text("Auction Houses");
-        auctionHouseTitleText.setStyle("-fx-font: 18 arial;");
-        vbox.getChildren().add(auctionHouseTitleText);
-
-        Button connect = new Button("Connect to Auction Houses");
+        Button connect = new Button("Scan for Houses");
         connect.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                System.out.println("Connecting to Auction Houses");
-                try {
-                    connectToAuctionHouses();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                System.out.println("Scan for Houses");
+                scanForAuctionHouses();
+
                 border.setLeft(showActionHouses());
             }
         });
@@ -124,15 +127,24 @@ public class Main extends Application {
     }
 
     /**
+     * Get a list of the current auction houses from the bank.
+     * Make a list of them and show them on the left side of the screen
+     */
+    public void scanForAuctionHouses(){
+        availableConnects.clear();
+        availableConnects = agent.getAuctionConnects();
+        border.setLeft(showActionHouses());
+    }
+
+    /**
      * Connects the agents to the auction houses
      */
-    public void connectToAuctionHouses() throws IOException {
+    public void connectToAuctionHouse() throws IOException {
         List<String> availableHouses = agent.getAuctionConnects();
 
         for(String house : availableHouses){
             AgentToAuction proxy = agent.connectToAuctionHouse(house);
-            String houseName = getHouseName(proxy);
-            activeProxies.add(proxy);
+            if(!activeProxies.contains(proxy)) activeProxies.add(proxy);
         }
     }
 
@@ -158,18 +170,19 @@ public class Main extends Application {
         auctionHouseTitleText.setStyle("-fx-font: 18 arial;");
         vbox.getChildren().add(auctionHouseTitleText);
 
-        if(activeProxies == null) return vbox;
+        if(availableConnects.size() != 0) {
+            List<Button> auctionLinks = new ArrayList<>();
+            for (int i = 0; i < availableConnects.size(); i++) {
+                Button newButton = auctionListButton(availableConnects.get(i));
+                auctionLinks.add(newButton);
+            }
 
-        List<Button> auctionLinks = new ArrayList<>();
-        for(int i = 0; i < activeProxies.size(); i++){
-            Button newButton = auctionListButton(activeProxies.get(i));
-            auctionLinks.add(newButton);
+            // Loop through the auction house buttons we made and add them to the vbox
+            for (Button auctionLink : auctionLinks) {
+                vbox.getChildren().add(auctionLink);
+            }
         }
-
-        // Loop through the auction house buttons we made and add them to the vbox
-        for (Button auctionLink : auctionLinks) {
-            vbox.getChildren().add(auctionLink);
-        }
+        vbox.getChildren().add(showConnectButton());
 
         return vbox;
     }
@@ -178,14 +191,22 @@ public class Main extends Application {
      * Makes the button that changes which auction house the GUI is showing
      * @return the button
      */
-    public Button auctionListButton(AgentToAuction proxy){
-        // String houseName = auctionMap.get(proxy);
-        String houseName = proxy.getHouseName();
+    public Button auctionListButton(String house){
+        String[] houseInfo = house.split(":");
+        String houseName = houseInfo[0];
         Button auctionButton = new Button(houseName);
         auctionButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                currProxy = proxy;
+                if(!agent.isConnectedTo(house)){
+                    try {
+                        AgentToAuction thisProxy = agent.connectToAuctionHouse(house);
+                        houseInfoToProxy.put(house, thisProxy);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                currProxy = houseInfoToProxy.get(house);
                 try {
                     border.setCenter(items(0));
                 } catch (IOException | InterruptedException e) {
@@ -196,18 +217,6 @@ public class Main extends Application {
         return auctionButton;
     }
 
-    /**
-     * Generate a house name for each of the proxies
-     * @param proxy the proxy that needs a name
-     * @return the assigned name
-     */
-    public String getHouseName(AgentToAuction proxy){
-        int r1 = (int)(Math.random() * allHouseNames.size());
-        if(auctionMap.containsValue(allHouseNames.get(r1))) return getHouseName(proxy);
-        else auctionMap.put(proxy, allHouseNames.get(r1));
-
-        return allHouseNames.get(r1);
-    }
 
     /**
      * Creates the tab panes that holds all the values from the current auciton house
@@ -368,6 +377,7 @@ public class Main extends Application {
      * arg[0] Bank Address
      * arg[1] Bank Port
      * arg[2] Agent Name
+     * arg[3] Agent Initial Balance
      * @param args
      */
     public static void main(String[] args) {

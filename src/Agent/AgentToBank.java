@@ -29,7 +29,23 @@ public class AgentToBank {
 
     public int getId(){ return agentID; }
 
-    public List<String> getAuctionConnects(){ return auctionConnects; }
+    /**
+     * Ask the bank for a list of the houses
+     * @return a list of the available auction houses to connect to
+     */
+    public List<String> getAuctionConnects(){
+        Message askForHouses = new Message(Origin.AGENT, Type.GET_HOUSES, "");
+        try {
+            out.writeObject(askForHouses);
+            Thread.sleep(100);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println(auctionConnects);
+        return auctionConnects;
+    }
 
 
     /**
@@ -39,6 +55,7 @@ public class AgentToBank {
      */
     private void parseAuctionConnects(String[] info){
         auctionConnects = new ArrayList<>();
+        auctionConnects.clear();
         for(int i = 1; i < info.length; i++){
             auctionConnects.add(info[i]);
         }
